@@ -1,4 +1,4 @@
-package com.biddingmate.authsession;
+package com.authsystem.authsession;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
