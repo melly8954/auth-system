@@ -32,4 +32,13 @@ public class ApiResponse<T> {
 
         return ResponseEntity.status(httpStatus).body(body);
     }
+
+    public static <T> ApiResponse<T> handlerOf(HttpStatus httpStatus, String errorCode, String message, T data) {
+        return ApiResponse.<T>builder()
+                .code(httpStatus.value())
+                .errorCode(errorCode)
+                .message(message)
+                .data(data)
+                .build();
+    }
 }
