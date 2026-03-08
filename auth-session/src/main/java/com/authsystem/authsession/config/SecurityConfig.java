@@ -25,6 +25,21 @@ public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
 
+    /*
+        Client
+         ↓
+        Security Filter Chain
+         ↓
+        JsonLoginFilter  // Security Filter가 직접 인증 처리
+         ↓
+        AuthenticationManager
+         ↓
+        AuthenticationProvider
+         ↓
+        UserDetailsService
+         ↓
+        SuccessHandler / FailureHandler
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         http
@@ -53,7 +68,7 @@ public class SecurityConfig {
     public JsonLoginFilter jsonLoginFilter(AuthenticationManager authenticationManager) {
         JsonLoginFilter filter = new JsonLoginFilter(new ObjectMapper());
         filter.setAuthenticationManager(authenticationManager);
-        filter.setFilterProcessesUrl("/api/v1/auth/login");
+        filter.setFilterProcessesUrl("/api/v1/auth/login"); // 로그인 URL을 시큐리티 필터가 가로챕니다.
 
         filter.setAuthenticationSuccessHandler(loginSuccessHandler);
         filter.setAuthenticationFailureHandler(loginFailureHandler);
