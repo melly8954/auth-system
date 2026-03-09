@@ -35,12 +35,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         user.updateLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
 
-        HttpSession session = request.getSession(true);
-        session.setAttribute(
-                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                SecurityContextHolder.getContext()
-        );
-
         ApiResponse<?> apiResponse = ApiResponse.handlerOf(HttpStatus.OK, null, "소셜 로그인 성공", null);
 
         response.setStatus(HttpServletResponse.SC_OK);

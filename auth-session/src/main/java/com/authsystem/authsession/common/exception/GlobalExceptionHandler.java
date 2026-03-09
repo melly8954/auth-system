@@ -3,6 +3,7 @@ package com.authsystem.authsession.common.exception;
 import com.authsystem.authsession.common.domain.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -19,6 +20,18 @@ public class GlobalExceptionHandler {
                 errorType.getHttpStatus(),
                 errorType.getErrorCode(),
                 e.getMessage(),
+                null
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException e) {
+        log.warn("권한 거부 예외 발생 - Message: {}", e.getMessage());
+
+        return ApiResponse.of(
+                ErrorType.FORBIDDEN.getHttpStatus(),
+                ErrorType.FORBIDDEN.getErrorCode(),
+                ErrorType.FORBIDDEN.getMessage(),
                 null
         );
     }
