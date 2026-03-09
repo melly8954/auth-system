@@ -1,7 +1,8 @@
 package com.authsystem.authsession.auth.service;
 
-import com.authsystem.authsession.auth.dto.LoginRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
+    void logout(HttpServletRequest request, HttpServletResponse response);
 }

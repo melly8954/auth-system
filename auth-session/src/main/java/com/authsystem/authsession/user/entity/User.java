@@ -39,9 +39,6 @@ public class User extends BaseEntity {
 
     private LocalDateTime lastLoginAt;
 
-    @OneToOne(mappedBy = "user")
-    private UserProfile profile;
-
     public void updateLastLoginAt(LocalDateTime lastLoginAt) {
         this.lastLoginAt = lastLoginAt;
     }

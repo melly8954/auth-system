@@ -3,6 +3,10 @@ package com.authsystem.authsession.config;
 import com.authsystem.authsession.auth.security.filter.JsonLoginFilter;
 import com.authsystem.authsession.auth.security.handler.LoginFailureHandler;
 import com.authsystem.authsession.auth.security.handler.LoginSuccessHandler;
+import com.authsystem.authsession.auth.security.handler.OAuth2FailHandler;
+import com.authsystem.authsession.auth.security.handler.OAuth2SuccessHandler;
+import com.authsystem.authsession.auth.service.CustomAuthorizationRequestResolver;
+import com.authsystem.authsession.auth.service.PrincipalOAuth2UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +18,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -24,7 +29,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
-
+    private final PrincipalOAuth2UserService principalOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailHandler oAuth2FailHandler;
+    private final ClientRegistrationRepository clientRegistrationRepository;
     /*
         Client
          ↓
@@ -49,12 +57,20 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/users").permitAll()
                         .anyRequest().authenticated())
                 .addFilterAt(jsonLoginFilter(authenticationManager),
-                        UsernamePasswordAuthenticationFilter.class);
-
+                        UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(auth -> auth
+                                .authorizationRequestResolver(
+                                        new CustomAuthorizationRequestResolver(clientRegistrationRepository)
+                                ))
+                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(principalOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailHandler));
         return http.build();
     }
 
