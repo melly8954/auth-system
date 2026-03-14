@@ -13,7 +13,7 @@ public class ApiResponse<T> {
     private int code;
     private String errorCode;
     private String message;
-    private T data;
+    private T result;
 
     /*
      * 제네릭 정적 팩토리 메서드
@@ -27,7 +27,7 @@ public class ApiResponse<T> {
                 .code(httpStatus.value())
                 .errorCode(errorCode)
                 .message(message)
-                .data(data)
+                .result(data)
                 .build();
 
         return ResponseEntity.status(httpStatus).body(body);
@@ -38,7 +38,7 @@ public class ApiResponse<T> {
                 .code(httpStatus.value())
                 .errorCode(errorCode)
                 .message(message)
-                .data(data)
+                .result(data)
                 .build();
     }
 }
