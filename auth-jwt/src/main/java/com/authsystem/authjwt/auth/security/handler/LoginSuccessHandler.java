@@ -55,7 +55,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         redisTemplate.opsForValue().set("RefreshToken:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
 
         // 쿠키 생성
-        Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken);
+        Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken, 1);
         response.addCookie(refreshCookie);
 
         LoginResponse dto = LoginResponse.builder()
