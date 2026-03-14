@@ -24,6 +24,7 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // @PreAuthorize 처리
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException e) {
         log.warn("권한 거부 예외 발생 - Message: {}", e.getMessage());

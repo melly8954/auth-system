@@ -1,6 +1,8 @@
 package com.authsystem.authjwt.config;
 
 import com.authsystem.authjwt.auth.security.filter.JsonLoginFilter;
+import com.authsystem.authjwt.auth.security.handler.CustomAccessDeniedHandler;
+import com.authsystem.authjwt.auth.security.handler.CustomAuthenticationEntryPoint;
 import com.authsystem.authjwt.auth.security.handler.LoginFailureHandler;
 import com.authsystem.authjwt.auth.security.handler.LoginSuccessHandler;
 import com.authsystem.authjwt.auth.security.handler.OAuth2FailHandler;
@@ -41,6 +43,8 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailHandler oAuth2FailHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
@@ -56,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/users").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/tests/**").permitAll()
+                        .requestMatchers("/api/v1/admins/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(
                         new JwtFilter(jwtUtil, principalDetailsService, redisTemplate),
@@ -69,7 +74,10 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(principalOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
-                        .failureHandler(oAuth2FailHandler));
+                        .failureHandler(oAuth2FailHandler))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint) // 인증 실패(401) 처리
+                        .accessDeniedHandler(customAccessDeniedHandler)); // 인가 실패(403) 처리
         return http.build();
     }
 
@@ -91,3 +99,4 @@ public class SecurityConfig {
         return filter;
     }
 }
+
