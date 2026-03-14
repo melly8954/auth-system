@@ -14,6 +14,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -34,6 +35,12 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final CookieUtil cookieUtil;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    @Value("${spring.jwt.accessExpiredMs}")
+    private long accessExpiredMs;
+
+    @Value("${spring.jwt.refreshExpiredMs}")
+    private long refreshExpiredMs;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         PrincipalDetails principal =
@@ -47,8 +54,8 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         // JWT 생성
         String tokenId = UUID.randomUUID().toString();
 
-        String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name(), tokenId,600000L);
-        String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name(), tokenId, 86400000L);
+        String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name(), tokenId, accessExpiredMs);
+        String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name(), tokenId, refreshExpiredMs);
 
 
         RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUsername(), user.getRole().name(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));

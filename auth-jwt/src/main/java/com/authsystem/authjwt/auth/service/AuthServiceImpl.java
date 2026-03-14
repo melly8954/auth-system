@@ -11,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,12 @@ public class AuthServiceImpl implements AuthService {
     private final CookieUtil cookieUtil;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
+
+    @Value("${spring.jwt.accessExpiredMs}")
+    private long accessExpiredMs;
+
+    @Value("${spring.jwt.refreshExpiredMs}")
+    private long refreshExpiredMs;
 
     @Override
     public ReIssueTokenDto reissueToken(HttpServletRequest request, HttpServletResponse response) {
@@ -62,14 +69,14 @@ public class AuthServiceImpl implements AuthService {
         String newTokenId = UUID.randomUUID().toString();
 
         // 새로운 accessToken, refreshToken 생성
-        String newAccessToken = jwtUtil.createJwt("AccessToken", username, refreshTokenDto.getRole(), newTokenId, 600000L);
-        String newRefreshToken = jwtUtil.createJwt("RefreshToken", username, refreshTokenDto.getRole(), newTokenId, 86400000L);
+        String newAccessToken = jwtUtil.createJwt("AccessToken", username, refreshTokenDto.getRole(), newTokenId, accessExpiredMs);
+        String newRefreshToken = jwtUtil.createJwt("RefreshToken", username, refreshTokenDto.getRole(), newTokenId, refreshExpiredMs);
 
         // Redis에 새로운 refreshToken 저장
         RefreshTokenDto newRefreshTokenDto = new RefreshTokenDto(
                 newTokenId, username, refreshTokenDto.getRole(),
                 LocalDateTime.now(),
-                LocalDateTime.now().plus(Duration.ofMillis(86400000L))
+                LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs))
         );
         redisTemplate.opsForValue().set("RefreshToken:" + username + ":" + newTokenId, newRefreshTokenDto, Duration.ofDays(1));
 
