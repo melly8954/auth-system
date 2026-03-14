@@ -59,7 +59,6 @@ public class SecurityConfig {
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/api/v1/users").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/tests/**").permitAll()
                         .requestMatchers("/api/v1/admins/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(
