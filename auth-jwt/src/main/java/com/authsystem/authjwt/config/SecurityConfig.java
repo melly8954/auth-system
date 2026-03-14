@@ -3,9 +3,13 @@ package com.authsystem.authjwt.config;
 import com.authsystem.authjwt.auth.security.filter.JsonLoginFilter;
 import com.authsystem.authjwt.auth.security.handler.LoginFailureHandler;
 import com.authsystem.authjwt.auth.security.handler.LoginSuccessHandler;
+import com.authsystem.authjwt.auth.security.handler.OAuth2FailHandler;
+import com.authsystem.authjwt.auth.security.handler.OAuth2SuccessHandler;
 import com.authsystem.authjwt.auth.security.jwt.JwtFilter;
 import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
+import com.authsystem.authjwt.auth.service.CustomAuthorizationRequestResolver;
 import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
+import com.authsystem.authjwt.auth.service.PrincipalOAuth2UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +23,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -32,6 +37,10 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final PrincipalDetailsService principalDetailsService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final PrincipalOAuth2UserService principalOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailHandler oAuth2FailHandler;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
@@ -53,7 +62,14 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(
                         jsonLoginFilter(authenticationManager),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(auth -> auth
+                                .authorizationRequestResolver(new CustomAuthorizationRequestResolver(clientRegistrationRepository)))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .oidcUserService(principalOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailHandler));
         return http.build();
     }
 
