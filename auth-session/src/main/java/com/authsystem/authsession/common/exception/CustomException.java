@@ -11,10 +11,4 @@ public class CustomException extends RuntimeException {
         super(errorType.getMessage());
         this.errorType = errorType;
     }
-
-    // 기본 ErrorType + 커스텀 메시지
-    public CustomException(ErrorType errorType, String message) {
-        super(message);
-        this.errorType = errorType;
-    }
 }
