@@ -38,3 +38,10 @@ spring:
             issuer-uri: https://kauth.kakao.com
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: sub
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+  data:
+    redis:
+      host: localhost
+      port: ${REDIS_LOCAL_PORT}
+      database: 0

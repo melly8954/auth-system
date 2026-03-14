@@ -1,5 +1,6 @@
 package com.authsystem.authjwt.common.exception;
 
+import com.nimbusds.openid.connect.sdk.assurance.IdentityAssuranceProcess;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,10 @@ public enum ErrorType {
 
     // user
     DUPLICATE_USERNAME("USER-001", "이미 존재하는 아이디입니다.", HttpStatus.BAD_REQUEST),
-    DUPLICATE_EMAIL("USER-002", "이미 존재하는 이메일입니다.", HttpStatus.BAD_REQUEST);
+    DUPLICATE_EMAIL("USER-002", "이미 존재하는 이메일입니다.", HttpStatus.BAD_REQUEST),
+
+    // auth
+    NOT_REQUIRED_INFO_FORBIDDEN("not_required_info_forbidden", "권한이 없습니다.", HttpStatus.FORBIDDEN);
 
     private final String errorCode;
     private final String message;
