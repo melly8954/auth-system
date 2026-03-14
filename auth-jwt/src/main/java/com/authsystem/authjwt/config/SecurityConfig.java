@@ -3,10 +3,14 @@ package com.authsystem.authjwt.config;
 import com.authsystem.authjwt.auth.security.filter.JsonLoginFilter;
 import com.authsystem.authjwt.auth.security.handler.LoginFailureHandler;
 import com.authsystem.authjwt.auth.security.handler.LoginSuccessHandler;
+import com.authsystem.authjwt.auth.security.jwt.JwtFilter;
+import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
+import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -25,6 +29,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
+    private final JwtUtil jwtUtil;
+    private final PrincipalDetailsService principalDetailsService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
@@ -39,8 +46,13 @@ public class SecurityConfig {
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/api/v1/users").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/tests/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterAt(jsonLoginFilter(authenticationManager),
+                .addFilterBefore(
+                        new JwtFilter(jwtUtil, principalDetailsService, redisTemplate),
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(
+                        jsonLoginFilter(authenticationManager),
                         UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

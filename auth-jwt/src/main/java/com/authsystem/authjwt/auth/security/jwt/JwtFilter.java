@@ -1,6 +1,7 @@
 package com.authsystem.authjwt.auth.security.jwt;
 
 import com.authsystem.authjwt.auth.security.principal.PrincipalDetails;
+import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
 import com.authsystem.authjwt.common.domain.dto.ApiResponse;
 import com.authsystem.authjwt.common.exception.CustomException;
 import com.authsystem.authjwt.common.exception.ErrorType;
@@ -16,6 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -28,12 +30,12 @@ public class JwtFilter extends OncePerRequestFilter {
     // OncePerRequestFilter 는 Spring Framework 에서 제공하는 추상 클래스로, 하나의 요청(request)당 딱 한 번만 실행되는 필터
     // JWT 검증 로직은 인증이 필요한 요청이 들어올 때마다 확실히 한 번만 실행되도록 보장
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
+    private final PrincipalDetailsService principalDetailsService;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public JwtFilter(JwtUtil jwtUtil, UserRepository userRepository, RedisTemplate<String, Object> redisTemplate) {
+    public JwtFilter(JwtUtil jwtUtil, PrincipalDetailsService principalDetailsService, RedisTemplate<String, Object> redisTemplate) {
         this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
+        this.principalDetailsService = principalDetailsService;
         this.redisTemplate = redisTemplate;
     }
 
@@ -94,10 +96,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // username 값 획득
         String username = jwtUtil.getUsername(accessToken);
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorType.NOT_FOUND));
-
-        PrincipalDetails principalDetails = new PrincipalDetails(user);
+        PrincipalDetails principalDetails = (PrincipalDetails) principalDetailsService.loadUserByUsername(username);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
