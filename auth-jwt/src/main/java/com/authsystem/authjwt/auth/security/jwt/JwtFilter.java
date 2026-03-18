@@ -23,11 +23,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-// Spring Security 필터 체인에서 Jwt 인증을 수행하는 핵심 필터입니다.
-// 요청이 들어올 때마다 실행되며, 유효한 Access Token 이 포함되어 있는지 확인하고, 있다면 이를 기반으로 SecurityContext 에 인증 정보를 등록
+
+/*
+    [JWT 인증 필터]
+
+    - 모든 요청마다 실행되며, JWT 토큰 기반 인증을 처리한다.
+    - 세션을 사용하지 않는 Stateless 환경에서 인증을 대신 수행하는 핵심 컴포넌트
+
+    [핵심 역할]
+    1. Authorization Header에서 JWT 추출
+    2. 토큰 유효성 검증 (만료, 타입, 블랙리스트 등)
+    3. 사용자 정보 조회 (UserDetailsService)
+    4. Authentication 객체 생성
+    5. SecurityContext에 인증 정보 저장
+
+    → 이후 필터 및 컨트롤러는 인증된 사용자로 인식
+ */
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
-    // OncePerRequestFilter 는 Spring Framework 에서 제공하는 추상 클래스로, 하나의 요청(request)당 딱 한 번만 실행되는 필터
+    // OncePerRequestFilter 는 Spring Framework 에서 제공하는 추상 클래스로, 하나의 HTTP 요청(request)당 딱 한 번만 실행되는 필터
     // JWT 검증 로직은 인증이 필요한 요청이 들어올 때마다 확실히 한 번만 실행되도록 보장
     private final JwtUtil jwtUtil;
     private final PrincipalDetailsService principalDetailsService;
@@ -45,7 +59,10 @@ public class JwtFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (header == null || !header.startsWith("Bearer ")) {
+            // JWT가 없는 요청 → 인증 대상이 아니므로 그대로 다음 필터로 전달
             filterChain.doFilter(request, response);
+
+            // 이후 JWT 검증 로직을 수행하지 않고 현재 필터 종료
             return;
         }
 
@@ -61,6 +78,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     ErrorType.UNAUTHORIZED.getErrorCode(),
                     "만료된 Access Token 입니다."
             );
+
+            // 유효하지 않은 토큰 → 인증 실패 처리 후 요청 종료 (다음 필터로 전달되지 않음)
             return;
         }
 
@@ -76,6 +95,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     ErrorType.UNAUTHORIZED.getErrorCode(),
                     "유효하지 않은 Access Token 입니다."
             );
+
+            // AccessToken이 아닌 경우 → 인증 실패로 간주하고 요청 종료
             return;
         }
 
@@ -90,6 +111,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     ErrorType.UNAUTHORIZED.getErrorCode(),
                     "해당 토큰은 BlackList 토큰입니다."
             );
+            // 로그아웃/강제 만료된 토큰 → 인증 불가, 요청 즉시 종료
             return;
         }
 
@@ -97,14 +119,28 @@ public class JwtFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(accessToken);
 
         PrincipalDetails principalDetails = (PrincipalDetails) principalDetailsService.loadUserByUsername(username);
-
         Authentication authToken = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
+
+        /*
+            SecurityContext에 인증 정보 저장
+            - 해당 요청 동안 인증 상태 유지
+            - 요청 종료 시 SecurityContext는 사라짐 (Stateless)
+            → 이후 필터 및 Controller에서 인증된 사용자로 인식
+        */
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
+        // 다음 필터 진행 filterChain.doFilter()
         filterChain.doFilter(request, response);
     }
 
-    // Spring Security Filter 내부에서는 일반적으로 @ControllerAdvice 기반 전역 예외처리(@ExceptionHandler)가 동작하지 않기에 JSON Response 처리
+
+    /*
+       [JWT 필터 내 예외 처리]
+
+       - Filter는 DispatcherServlet 이전 단계에서 동작
+       - 즉, @ControllerAdvice (@ExceptionHandler) 적용되지 않음
+       - 따라서 직접 JSON 응답 작성 필요
+    */
     private void sendErrorResponse(HttpServletResponse response, int status, String errorCode, String message) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
