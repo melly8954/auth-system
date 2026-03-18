@@ -16,6 +16,7 @@ import java.io.IOException;
 public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
 
+    // 여기서 getAuthenticationManager()를 호출
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
