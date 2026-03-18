@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -20,12 +21,23 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+        String message;
+        String errorCode;
+
+        if (exception instanceof LockedException) {
+            message = "계정이 일시정지 되었습니다.";
+            errorCode = "AUTH_002";
+        }  else {
+            message = "아이디 또는 비밀번호가 틀립니다.";
+            errorCode = "AUTH_001";
+        }
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         ApiResponse<?> apiResponse =
-                ApiResponse.handlerOf(HttpStatus.UNAUTHORIZED, "auth-001", "로그인에 실패했습니다.", null);
+                ApiResponse.handlerOf(HttpStatus.UNAUTHORIZED, errorCode, message, null);
 
         objectMapper.writeValue(response.getWriter(), apiResponse);
     }

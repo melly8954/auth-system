@@ -71,6 +71,12 @@ public class PrincipalDetails implements UserDetails, OidcUser {
         return user.getStatus() == UserStatus.ACTIVE;
     }
 
+    // 계정 잠금 여부
+    @Override
+    public boolean isAccountNonLocked() {
+        return user.getStatus() != UserStatus.INACTIVE;
+    }
+
     @Override
     public Map<String, Object> getClaims() {
         return oidcUser != null ? oidcUser.getClaims() : Map.of();
