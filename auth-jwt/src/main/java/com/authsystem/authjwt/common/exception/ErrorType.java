@@ -21,10 +21,15 @@ public enum ErrorType {
     DUPLICATE_EMAIL("USER-002", "이미 존재하는 이메일입니다.", HttpStatus.BAD_REQUEST),
 
     // auth
-    REFRESH_TOKEN_NOT_FOUND("auth-001", "Refresh Token을 요청받지 못했습니다.", HttpStatus.NOT_FOUND),
-    REFRESH_TOKEN_EXPIRED("auth-002", "만료된 Refresh Token입니다.", HttpStatus.CONFLICT),
-    REFRESH_TOKEN_INVALID("auth-003", "유효하지 않은 Refresh Token입니다.", HttpStatus.CONFLICT),
-    REFRESH_TOKEN_NOT_IN_REDIS("auth-004", "Refresh Token이 Redis에 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+    ACCESS_TOKEN_NOT_FOUND("auth-access-001", "Access Token을 요청받지 못했습니다.", HttpStatus.NOT_FOUND),
+    ACCESS_TOKEN_EXPIRED("auth-access-002", "만료된 Access Token입니다.", HttpStatus.CONFLICT),
+    ACCESS_TOKEN_INVALID("auth-access-003", "유효하지 않은 Access Token입니다.", HttpStatus.CONFLICT),
+    ACCESS_TOKEN_OF_BLACK_LIST("auth-access-004", "해당 Access Token은 BlackList 토큰입니다.", HttpStatus.BAD_REQUEST),
+
+    REFRESH_TOKEN_NOT_FOUND("auth-refresh-001", "Refresh Token을 요청받지 못했습니다.", HttpStatus.NOT_FOUND),
+    REFRESH_TOKEN_EXPIRED("auth-refresh-002", "만료된 Refresh Token입니다.", HttpStatus.CONFLICT),
+    REFRESH_TOKEN_INVALID("auth-refresh-003", "유효하지 않은 Refresh Token입니다.", HttpStatus.CONFLICT),
+    REFRESH_TOKEN_NOT_IN_REDIS("auth-refresh-004", "Refresh Token이 Redis에 존재하지 않습니다.", HttpStatus.NOT_FOUND);
 
     private final String errorCode;
     private final String message;

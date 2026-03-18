@@ -74,9 +74,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
             sendErrorResponse(
                     response,
-                    ErrorType.UNAUTHORIZED.getHttpStatus().value(),
-                    ErrorType.UNAUTHORIZED.getErrorCode(),
-                    "만료된 Access Token 입니다."
+                    ErrorType.ACCESS_TOKEN_EXPIRED.getHttpStatus().value(),
+                    ErrorType.ACCESS_TOKEN_EXPIRED.getErrorCode(),
+                    ErrorType.ACCESS_TOKEN_EXPIRED.getMessage()
             );
 
             // 유효하지 않은 토큰 → 인증 실패 처리 후 요청 종료 (다음 필터로 전달되지 않음)
@@ -91,9 +91,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
             sendErrorResponse(
                     response,
-                    ErrorType.UNAUTHORIZED.getHttpStatus().value(),
-                    ErrorType.UNAUTHORIZED.getErrorCode(),
-                    "유효하지 않은 Access Token 입니다."
+                    ErrorType.ACCESS_TOKEN_INVALID.getHttpStatus().value(),
+                    ErrorType.ACCESS_TOKEN_INVALID.getErrorCode(),
+                    ErrorType.ACCESS_TOKEN_INVALID.getMessage()
             );
 
             // AccessToken이 아닌 경우 → 인증 실패로 간주하고 요청 종료
@@ -107,9 +107,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
             sendErrorResponse(
                     response,
-                    ErrorType.UNAUTHORIZED.getHttpStatus().value(),
-                    ErrorType.UNAUTHORIZED.getErrorCode(),
-                    "해당 토큰은 BlackList 토큰입니다."
+                    ErrorType.ACCESS_TOKEN_OF_BLACK_LIST.getHttpStatus().value(),
+                    ErrorType.ACCESS_TOKEN_OF_BLACK_LIST.getErrorCode(),
+                    ErrorType.ACCESS_TOKEN_OF_BLACK_LIST.getMessage()
             );
             // 로그아웃/강제 만료된 토큰 → 인증 불가, 요청 즉시 종료
             return;
