@@ -38,13 +38,14 @@ spring:
             issuer-uri: https://kauth.kakao.com
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: sub
-  jwt:
-    secret: ${JWT_SECRET_KEY}
-    accessExpiredMs: ${JWT_ACCESS_EXPIRED_MS}
-    refreshExpiredMs: ${JWT_REFRESH_EXPIRED_MS}
-
   data:
     redis:
       host: localhost
       port: ${REDIS_LOCAL_PORT}
       database: 0
+
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret: ${JWT_SECRET_KEY}
+  accessExpiredMs: ${JWT_ACCESS_EXPIRED_MS}
+  refreshExpiredMs: ${JWT_REFRESH_EXPIRED_MS}
