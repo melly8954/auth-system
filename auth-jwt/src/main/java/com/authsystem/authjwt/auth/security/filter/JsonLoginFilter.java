@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -12,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
@@ -39,7 +42,8 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
             */
             return this.getAuthenticationManager().authenticate(authToken);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("로그인 요청 파싱 실패 {}: ", e.getMessage());
+            throw new AuthenticationServiceException("로그인 요청 파싱 실패: " +  e.getMessage());
         }
     }
 }
