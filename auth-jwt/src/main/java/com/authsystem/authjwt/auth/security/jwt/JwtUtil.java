@@ -10,35 +10,32 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtUtil {
+    private String issuer;
     private SecretKey secretKey;
 
-    public JwtUtil(@Value("${spring.jwt.secret}")String secret) {
+    public JwtUtil(@Value("${jwt.issuer}")String issuer,
+                   @Value("${jwt.secret}")String secret) {
+        this.issuer = issuer;
         // String 타입의 secret 을 객체변수(secretKey) 로 암호화
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
     public String getCategory(String token){
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
+        return getClaims(token).get("category", String.class);
     }
 
     public String getUsername(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
-    }
-
-    public String getRole(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
+        return getClaims(token).get("username", String.class);
     }
 
     public String getTokenId(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("tokenId", String.class);
-    }
-
-    public String getProvider(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("provider", String.class);
+        return getClaims(token).get("tokenId", String.class);
     }
 
     public Boolean isExpired(String token) {
@@ -52,13 +49,15 @@ public class JwtUtil {
     }
 
     // Jwt 생성
-    public String createJwt(String category, String username, String role, String tokenId,Long expiredMs){
+    public String createJwt(String category, String username, String role,Long expiredMs){
         return Jwts.builder()
+                .header().add("typ", "JWT").and()
+                .id(UUID.randomUUID().toString())
+                .issuer(this.issuer)
                 .claim("category",category)
                 .claim("username",username)
                 .claim("role",role)
-                .claim("tokenId", tokenId)
-                .issuedAt(new Date(System.currentTimeMillis()))
+                .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
                 .compact();
@@ -79,6 +78,23 @@ public class JwtUtil {
         } catch (ExpiredJwtException e) {
             // 이미 만료된 경우, 남은 시간은 0
             return 0;
+        }
+    }
+
+    // JWT에서 클레임을 추출하는 메서드
+    private Claims getClaims(String accessToken) {
+        // 토큰이 만료되면 parseSignedClaims() 메서드에서
+        // ExpiredJwtException 예외가 발생하여 코드가 실행되지 않기 때문에
+        // ExpiredJwtException 예외가 발생해도 클레임을 반환하도록 예외 처리를 한다.
+        try {
+            return Jwts
+                    .parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(accessToken)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
         }
     }
 }
