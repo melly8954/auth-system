@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -26,6 +25,11 @@ public class JwtUtil {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
+    // 클레임에서 JTI(JWT ID(를 추출하는 메서드
+    public String getTokenId(String token) {
+        return getClaims(token).getId();
+    }
+
     public String getCategory(String token){
         return getClaims(token).get("category", String.class);
     }
@@ -34,18 +38,19 @@ public class JwtUtil {
         return getClaims(token).get("username", String.class);
     }
 
-    public String getTokenId(String token) {
-        return getClaims(token).get("tokenId", String.class);
+    public String getRole(String token) {
+        return getClaims(token).get("role", String.class);
     }
 
-    public Boolean isExpired(String token) {
-        try {
-            // parseSignedClaims 시 이미 만료 검사 포함
-            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
-            return false; // 예외 없으면 만료되지 않음
-        } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            return true;  // 만료됨
-        }
+    // 토큰이 만료되기까지 남은 시간을 밀리초(ms)로 반환하며, 이미 만료된 경우 0을 반환한다.
+    public long getRemainingExpirationMillis(String token) {
+        Date expiration = getClaims(token).getExpiration();
+        return Math.max(expiration.getTime() - System.currentTimeMillis(), 0);
+    }
+
+    // 토큰이 현재 시점 기준으로 만료되었는지 여부를 반환한다.
+    public boolean isExpired(String token) {
+        return getClaims(token).getExpiration().before(new Date());
     }
 
     // Jwt 생성
@@ -63,37 +68,16 @@ public class JwtUtil {
                 .compact();
     }
 
-    public long getExpiration(String token) {
-        try {
-            // 토큰 검증 + 파싱
-            Jwt<?, Claims> jwt = Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token);
-
-            Claims claims = jwt.getPayload();
-            Date exp = claims.getExpiration(); // "exp"를 Date로 가져옴
-            return exp.getTime() - System.currentTimeMillis();
-
-        } catch (ExpiredJwtException e) {
-            // 이미 만료된 경우, 남은 시간은 0
-            return 0;
-        }
-    }
-
     // JWT에서 클레임을 추출하는 메서드
-    private Claims getClaims(String accessToken) {
-        // 토큰이 만료되면 parseSignedClaims() 메서드에서
-        // ExpiredJwtException 예외가 발생하여 코드가 실행되지 않기 때문에
-        // ExpiredJwtException 예외가 발생해도 클레임을 반환하도록 예외 처리를 한다.
+    private Claims getClaims(String token) {
         try {
-            return Jwts
-                    .parser()
+            return Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parseSignedClaims(accessToken)
+                    .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException e) {
+            // 만료되었더라도 payload 자체는 필요할 수 있으므로 반환
             return e.getClaims();
         }
     }

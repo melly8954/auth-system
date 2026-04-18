@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -53,10 +52,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String username = jwtUtil.getUsername(refreshToken);
-        String tokenId = jwtUtil.getTokenId(refreshToken);
-
-        String key = "RefreshToken:" + username + ":" + tokenId;
-        Object redisValue = redisTemplate.opsForValue().get(key);
+        String redisKey = jwtUtil.getTokenId(refreshToken);
+        Object redisValue = redisTemplate.opsForValue().get(redisKey);
 
         if (redisValue == null) {
             throw new CustomException(ErrorType.REFRESH_TOKEN_NOT_IN_REDIS);
@@ -65,29 +62,32 @@ public class AuthServiceImpl implements AuthService {
         // Object -> DTO 변환
         RefreshTokenDto refreshTokenDto = objectMapper.convertValue(redisValue, RefreshTokenDto.class);
 
-        // 새로운 tokenId 생성
-        String newTokenId = UUID.randomUUID().toString();
-
         // 새로운 accessToken, refreshToken 생성
-        String newAccessToken = jwtUtil.createJwt("AccessToken", username, refreshTokenDto.getRole(), newTokenId, accessExpiredMs);
-        String newRefreshToken = jwtUtil.createJwt("RefreshToken", username, refreshTokenDto.getRole(), newTokenId, refreshExpiredMs);
+        String newAccessToken = jwtUtil.createJwt("AccessToken", username, refreshTokenDto.getRole(), accessExpiredMs);
+        String newRefreshToken = jwtUtil.createJwt("RefreshToken", username, refreshTokenDto.getRole(), refreshExpiredMs);
+
+        // 새로운 jti
+        String newRefreshJti = jwtUtil.getTokenId(newRefreshToken);
 
         // Redis에 새로운 refreshToken 저장
-        RefreshTokenDto newRefreshTokenDto = new RefreshTokenDto(
-                newTokenId, username, refreshTokenDto.getRole(),
-                LocalDateTime.now(),
-                LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs))
-        );
-        redisTemplate.opsForValue().set("RefreshToken:" + username + ":" + newTokenId, newRefreshTokenDto, Duration.ofDays(1));
+        RefreshTokenDto newRefreshTokenDto = RefreshTokenDto.builder()
+                .tokenId(newRefreshJti)
+                .getUsername(username)
+                .role(refreshTokenDto.getRole())
+                .issuedAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs)))
+                .build();
+
+        redisTemplate.opsForValue().set("RefreshToken:" + newRefreshJti, newRefreshTokenDto, Duration.ofMillis(refreshExpiredMs));
 
         // 기존 refresh token 삭제
-        redisTemplate.delete(key);
+        redisTemplate.delete(redisKey);
 
         // 쿠키에 새로운 refreshToken 저장
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", newRefreshToken, 1);
         response.addCookie(refreshCookie);
 
-        return new ReIssueTokenDto(newAccessToken, newRefreshToken);
+        return ReIssueTokenDto.builder().newAccessToken(newAccessToken).build();
     }
 
     @Override
@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 토큰에서 남은 만료 시간 계산
-        long expiration = jwtUtil.getExpiration(accessToken);
+        long expiration = jwtUtil.getRemainingExpirationMillis(accessToken);
 
         // Redis 블랙리스트에 저장 (TTL 설정)
         if (expiration > 0) {

@@ -3,10 +3,7 @@ package com.authsystem.authjwt.auth.security.jwt;
 import com.authsystem.authjwt.auth.security.principal.PrincipalDetails;
 import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
 import com.authsystem.authjwt.common.domain.dto.ApiResponse;
-import com.authsystem.authjwt.common.exception.CustomException;
 import com.authsystem.authjwt.common.exception.ErrorType;
-import com.authsystem.authjwt.user.entity.User;
-import com.authsystem.authjwt.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,7 +14,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;

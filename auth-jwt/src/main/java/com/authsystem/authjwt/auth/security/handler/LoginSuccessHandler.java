@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -50,15 +49,20 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         userRepository.save(user);
 
-        // JWT 생성
-        String tokenId = UUID.randomUUID().toString();
+        String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name(), accessExpiredMs);
+        String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name(), refreshExpiredMs);
 
-        String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name(), tokenId, accessExpiredMs);
-        String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name(), tokenId, refreshExpiredMs);
+        String refreshJti = jwtUtil.getTokenId(refreshToken);
 
+        RefreshTokenDto refreshTokenDto = RefreshTokenDto.builder()
+                .tokenId(refreshJti)
+                .getUsername(user.getUsername())
+                .role(user.getRole().name())
+                .issuedAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs)))
+                .build();
 
-        RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUsername(), user.getRole().name(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));
-        redisTemplate.opsForValue().set("RefreshToken:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
+        redisTemplate.opsForValue().set("RefreshToken:" + refreshJti, refreshTokenDto, Duration.ofMillis(refreshExpiredMs));
 
         // 쿠키 생성
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken, 1);
@@ -68,7 +72,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .username(user.getUsername())
                 .role(user.getRole().name())
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .build();
 
         ApiResponse<?> apiResponse = ApiResponse.handlerOf(HttpStatus.OK, null, "로그인 성공", dto);

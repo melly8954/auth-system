@@ -9,6 +9,5 @@ import lombok.Getter;
 @Builder
 public class ReIssueTokenDto {
     private String newAccessToken;
-    private String newRefreshToken;
 }
 
