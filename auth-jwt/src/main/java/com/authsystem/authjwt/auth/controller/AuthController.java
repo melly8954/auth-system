@@ -8,7 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,14 +21,17 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<ReIssueTokenDto>> reissueToken(HttpServletRequest request, HttpServletResponse response){
-        ReIssueTokenDto responseDto = authService.reissueToken(request, response);
+    public ResponseEntity<ApiResponse<ReIssueTokenDto>> reissueToken(@CookieValue(name = "refreshToken", defaultValue = "") String refreshToken,
+                                                                     HttpServletResponse response) {
+        ReIssueTokenDto responseDto = authService.reissueToken(refreshToken, response);
         return ApiResponse.of(HttpStatus.OK, "null","토큰 재발급 성공", responseDto);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response){
-        authService.logout(request,response);
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader(name = "Authorization", required = false) String BearerToken,
+                                                    @CookieValue(name = "refreshToken", defaultValue = "") String refreshToken,
+                                                    HttpServletResponse response) {
+        authService.logout(BearerToken, refreshToken, response);
         return ApiResponse.of(HttpStatus.OK, "null","로그아웃 성공", null);
     }
 }

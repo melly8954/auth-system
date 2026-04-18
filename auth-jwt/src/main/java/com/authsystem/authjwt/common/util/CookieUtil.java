@@ -16,7 +16,8 @@ public class CookieUtil {
         return cookie;
     }
 
-    // 쿠키 조회
+    // 요청 쿠키에서 지정한 이름의 값을 조회한다.
+    // 현재는 사용하지 않지만, 쿠키를 직접 조회해야 하는 경우를 위해 유지한다.
     public String getValue(HttpServletRequest request, String key) {
         if (request.getCookies() == null) {
             return null;

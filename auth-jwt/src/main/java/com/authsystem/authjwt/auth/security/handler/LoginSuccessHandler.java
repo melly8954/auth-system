@@ -46,7 +46,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         User user = principal.getUser();
         user.updateLastLoginAt(LocalDateTime.now());
-
         userRepository.save(user);
 
         String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name(), accessExpiredMs);
@@ -56,13 +55,13 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         RefreshTokenDto refreshTokenDto = RefreshTokenDto.builder()
                 .tokenId(refreshJti)
-                .getUsername(user.getUsername())
+                .username(user.getUsername())
                 .role(user.getRole().name())
                 .issuedAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs)))
                 .build();
 
-        redisTemplate.opsForValue().set("RefreshToken:" + refreshJti, refreshTokenDto, Duration.ofMillis(refreshExpiredMs));
+        redisTemplate.opsForValue().set(refreshJti, refreshTokenDto, Duration.ofMillis(refreshExpiredMs));
 
         // 쿠키 생성
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken, 1);

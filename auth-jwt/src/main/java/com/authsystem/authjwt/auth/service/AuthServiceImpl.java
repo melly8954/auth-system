@@ -8,7 +8,6 @@ import com.authsystem.authjwt.common.exception.ErrorType;
 import com.authsystem.authjwt.common.util.CookieUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,10 +33,9 @@ public class AuthServiceImpl implements AuthService {
     private long refreshExpiredMs;
 
     @Override
-    public ReIssueTokenDto reissueToken(HttpServletRequest request, HttpServletResponse response) {
-        // 쿠키에서 refresh 토큰 추출
-        String refreshToken = cookieUtil.getValue(request, "RefreshToken");
-        if (refreshToken == null) {
+    public ReIssueTokenDto reissueToken(String refreshToken, HttpServletResponse response) {
+        // RefreshToken 존재하지 않는 경우
+        if (refreshToken == null || refreshToken.isBlank()) {
             throw new CustomException(ErrorType.REFRESH_TOKEN_NOT_FOUND);
         }
 
@@ -72,13 +70,13 @@ public class AuthServiceImpl implements AuthService {
         // Redis에 새로운 refreshToken 저장
         RefreshTokenDto newRefreshTokenDto = RefreshTokenDto.builder()
                 .tokenId(newRefreshJti)
-                .getUsername(username)
+                .username(username)
                 .role(refreshTokenDto.getRole())
                 .issuedAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs)))
                 .build();
 
-        redisTemplate.opsForValue().set("RefreshToken:" + newRefreshJti, newRefreshTokenDto, Duration.ofMillis(refreshExpiredMs));
+        redisTemplate.opsForValue().set(newRefreshJti, newRefreshTokenDto, Duration.ofMillis(refreshExpiredMs));
 
         // 기존 refresh token 삭제
         redisTemplate.delete(redisKey);
@@ -91,11 +89,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = request.getHeader("Authorization");
+    public void logout(String BearerToken, String refreshToken, HttpServletResponse response) {
+        String accessToken = null;
 
-        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-            accessToken = accessToken.substring(7); // "Bearer " 제거
+        if (BearerToken != null && BearerToken.startsWith("Bearer ")) {
+            accessToken = BearerToken.substring(7); // "Bearer " 제거
         }
 
         // 토큰에서 남은 만료 시간 계산
@@ -111,12 +109,7 @@ public class AuthServiceImpl implements AuthService {
             );
         }
 
-        String refreshToken = cookieUtil.getValue(request, "RefreshToken");
-
-        String username = jwtUtil.getUsername(refreshToken);
-        String tokenId = jwtUtil.getTokenId(refreshToken);
-
-        String key = "RefreshToken:" + username + ":" + tokenId;
+        String key = jwtUtil.getTokenId(refreshToken);
 
         redisTemplate.delete(key);
 

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class RefreshTokenDto {
     private String tokenId;
-    private String getUsername;
+    private String username;
     private String role;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime issuedAt;

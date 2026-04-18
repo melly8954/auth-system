@@ -42,8 +42,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        PrincipalDetails principal =
-                (PrincipalDetails) authentication.getPrincipal();
+        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
         User user = principal.getUser();
         user.updateLastLoginAt(LocalDateTime.now());
@@ -56,13 +55,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         RefreshTokenDto refreshTokenDto = RefreshTokenDto.builder()
                 .tokenId(refreshJti)
-                .getUsername(user.getUsername())
+                .username(user.getUsername())
                 .role(user.getRole().name())
                 .issuedAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs)))
                 .build();
 
-        redisTemplate.opsForValue().set("RefreshToken:" + refreshJti, refreshTokenDto, Duration.ofMillis(refreshExpiredMs));
+        redisTemplate.opsForValue().set(refreshJti, refreshTokenDto, Duration.ofMillis(refreshExpiredMs));
 
         // 쿠키 생성
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken, 1);
