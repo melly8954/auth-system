@@ -34,10 +34,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final CookieUtil cookieUtil;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    @Value("${spring.jwt.accessExpiredMs}")
+    @Value("${jwt.accessExpiredMs}")
     private long accessExpiredMs;
 
-    @Value("${spring.jwt.refreshExpiredMs}")
+    @Value("${jwt.refreshExpiredMs}")
     private long refreshExpiredMs;
 
     @Override
