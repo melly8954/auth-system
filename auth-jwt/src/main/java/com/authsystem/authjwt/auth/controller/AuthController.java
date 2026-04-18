@@ -3,7 +3,6 @@ package com.authsystem.authjwt.auth.controller;
 import com.authsystem.authjwt.auth.dto.ReIssueTokenDto;
 import com.authsystem.authjwt.auth.service.AuthService;
 import com.authsystem.authjwt.common.domain.dto.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

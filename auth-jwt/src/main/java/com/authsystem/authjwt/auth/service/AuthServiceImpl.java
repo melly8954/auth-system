@@ -26,10 +26,10 @@ public class AuthServiceImpl implements AuthService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${spring.jwt.accessExpiredMs}")
+    @Value("${jwt.accessExpiredMs}")
     private long accessExpiredMs;
 
-    @Value("${spring.jwt.refreshExpiredMs}")
+    @Value("${jwt.refreshExpiredMs}")
     private long refreshExpiredMs;
 
     @Override

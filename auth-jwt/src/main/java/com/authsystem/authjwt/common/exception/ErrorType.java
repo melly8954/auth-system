@@ -1,6 +1,5 @@
 package com.authsystem.authjwt.common.exception;
 
-import com.nimbusds.openid.connect.sdk.assurance.IdentityAssuranceProcess;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
