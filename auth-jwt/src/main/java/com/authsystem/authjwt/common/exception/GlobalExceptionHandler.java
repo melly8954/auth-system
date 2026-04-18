@@ -42,9 +42,9 @@ public class GlobalExceptionHandler {
         log.error("서버 내부 예외 발생 - Message: {}", e.getMessage());
 
         return ApiResponse.of(
-                ErrorType.INTERNAL_ERROR.getHttpStatus(),
-                ErrorType.INTERNAL_ERROR.getErrorCode(),
-                ErrorType.INTERNAL_ERROR.getMessage(),
+                ErrorType.INTERNAL_SERVER_ERROR.getHttpStatus(),
+                ErrorType.INTERNAL_SERVER_ERROR.getErrorCode(),
+                ErrorType.INTERNAL_SERVER_ERROR.getMessage(),
                 null
         );
     }

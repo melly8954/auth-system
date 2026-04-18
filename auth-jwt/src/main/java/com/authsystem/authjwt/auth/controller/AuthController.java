@@ -20,7 +20,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<ReIssueTokenDto>> reissueToken(@CookieValue(name = "refreshToken", defaultValue = "") String refreshToken,
+    public ResponseEntity<ApiResponse<ReIssueTokenDto>> reissueToken(@CookieValue(name = "RefreshToken", defaultValue = "") String refreshToken,
                                                                      HttpServletResponse response) {
         ReIssueTokenDto responseDto = authService.reissueToken(refreshToken, response);
         return ApiResponse.of(HttpStatus.OK, "null","토큰 재발급 성공", responseDto);
@@ -28,7 +28,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader(name = "Authorization", required = false) String BearerToken,
-                                                    @CookieValue(name = "refreshToken", defaultValue = "") String refreshToken,
+                                                    @CookieValue(name = "RefreshToken", defaultValue = "") String refreshToken,
                                                     HttpServletResponse response) {
         authService.logout(BearerToken, refreshToken, response);
         return ApiResponse.of(HttpStatus.OK, "null","로그아웃 성공", null);
