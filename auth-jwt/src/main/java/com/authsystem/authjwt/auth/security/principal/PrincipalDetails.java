@@ -62,7 +62,10 @@ public class PrincipalDetails implements UserDetails, OidcUser {
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        if (user.getUsername() != null && !user.getUsername().isBlank()) {
+            return user.getUsername();
+        }
+        return oidcUser != null ? oidcUser.getName() : null;
     }
 
     // 계정 활성화 여부

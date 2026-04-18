@@ -30,9 +30,7 @@ spring:
               - profile_nickname
               - profile_image
               - account_email
-              - name
               - openid
-              - talk_message
         provider:
           kakao:
             issuer-uri: https://kauth.kakao.com
