@@ -65,6 +65,7 @@ public class PrincipalOAuth2UserService implements OAuth2UserService<OidcUserReq
         } else {
             // 신규 사용자 가입
             user = User.builder()
+                    .username(providerId)
                     .email(email)
                     .status(UserStatus.ACTIVE)
                     .role(UserRole.USER)
