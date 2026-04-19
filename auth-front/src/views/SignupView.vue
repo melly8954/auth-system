@@ -58,14 +58,15 @@ const form = reactive({
 })
 
 async function submit() {
-  await authStore.signUp({
+  const response = await authStore.signUp({
     username: form.username,
     password: form.password,
     email: form.email,
     name: form.name,
     nickname: form.nickname,
-  })
+  });
 
-  router.push('/login')
+  authStore.showToast(response?.message);
+  router.push('/login');
 }
 </script>

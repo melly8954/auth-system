@@ -1,49 +1,45 @@
 import { createApiClient, getApiResult } from '../http'
 
-const baseURL = import.meta.env.VITE_JWT_API_BASE_URL || 'http://localhost:8081'
-const api = createApiClient(baseURL)
+const baseURL = import.meta.env.VITE_JWT_API_BASE_URL;
+const api = createApiClient(baseURL);
 
-let accessToken = ''
-
-function getErrorMessage(error, fallbackMessage) {
-  return error?.response?.data?.message || fallbackMessage
-}
+let accessToken = '';
 
 api.interceptors.request.use((config) => {
   if (!accessToken) {
-    return config
+    return config;
   }
 
-  config.headers = config.headers || {}
-  config.headers.Authorization = `Bearer ${accessToken}`
-  return config
-})
+  config.headers = config.headers || {};
+  config.headers.Authorization = `Bearer ${accessToken}`;
+  return config;
+});
 
 function applyAuthorizationHeader(token) {
-  accessToken = token || ''
+  accessToken = token || '';
 
   if (accessToken) {
-    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
-    return
+    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+    return;
   }
 
-  delete api.defaults.headers.common.Authorization
+  delete api.defaults.headers.common.Authorization;
 }
 
 export function getAccessToken() {
-  return accessToken
+  return accessToken;
 }
 
 export function clearAccessToken() {
-  applyAuthorizationHeader('')
+  applyAuthorizationHeader('');
 }
 
 export async function signUp(payload) {
   try {
-    const response = await api.post('/api/v1/users', payload)
-    return response.data
+    const response = await api.post('/api/v1/users', payload);
+    return response.data;
   } catch (error) {
-    throw new Error(getErrorMessage(error, 'JWT 회원가입에 실패했습니다.'))
+    throw error;
   }
 }
 

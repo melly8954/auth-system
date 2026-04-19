@@ -20,3 +20,7 @@ export function getApiResult(response) {
 export function getApiErrorCode(error) {
   return error?.response?.data?.errorCode ?? null
 }
+
+export function getApiErrorMessage(error, fallbackMessage = '') {
+  return error?.response?.data?.message || fallbackMessage
+}

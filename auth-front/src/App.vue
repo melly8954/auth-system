@@ -18,9 +18,9 @@
           </nav>
         </div>
 
-        <div v-if="errorMessage" class="panel error-panel">
+        <div v-if="errorUiMessage" class="panel error-panel">
           <h2>에러</h2>
-          <p>{{ errorMessage }}</p>
+          <p>{{ errorUiMessage }}</p>
         </div>
       </aside>
 
@@ -28,6 +28,12 @@
         <RouterView />
       </section>
     </main>
+
+    <transition name="toast-fade">
+      <div v-if="toastUiMessage" class="toast" :class="toastUiType">
+        {{ toastUiMessage }}
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -36,10 +42,10 @@ import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from './stores/auth'
 
-const authStore = useAuthStore()
-const { errorMessage } = storeToRefs(authStore)
+const authStore = useAuthStore();
+const { errorUiMessage, toastUiMessage, toastUiType } = storeToRefs(authStore);
 
 onMounted(() => {
-  authStore.bootstrap()
-})
+  authStore.bootstrap();
+});
 </script>

@@ -1,14 +1,3 @@
-export const SESSION_ERROR_CODES = {
-  BAD_REQUEST: 'bad_request',
-  UNAUTHORIZED: 'unauthorized',
-  FORBIDDEN: 'forbidden',
-  NOT_FOUND: 'not_found',
-  CONFLICT: 'conflict',
-  INTERNAL_ERROR: 'internal_error',
-  DUPLICATE_USERNAME: 'USER-001',
-  DUPLICATE_EMAIL: 'USER-002',
-}
-
 export const JWT_ERROR_CODES = {
   USER_NOT_FOUND: 'USER_001',
   DUPLICATE_USERNAME: 'USER_002',
