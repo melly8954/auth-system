@@ -4,8 +4,8 @@
       <p class="eyebrow">Dashboard</p>
       <h2>인증 상태와 토큰 검증</h2>
       <p class="description">
-        로그인 응답으로 인증 상태와 access token을 세팅하고, 아래 버튼으로
-        <code>/api/v1/tests/user</code>를 호출해 현재 토큰이 실제로 통과하는지만 확인합니다.
+        로그인 응답으로 인증 상태와 access token을 세팅하고 아래 버튼으로 <br>
+        <code>/api/v1/tests/user</code>를 호출해 현재 토큰이 실제로 작동한다면 User ID를 저장합니다.
       </p>
     </div>
 

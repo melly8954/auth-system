@@ -66,6 +66,11 @@ export const useAuthStore = defineStore('auth', {
       this.isAuthenticated = false;
     },
 
+    applyVerifyResult(response) {
+      const result = getApiResult(response);
+      this.userId = result ?? null;
+    },
+
     async signUp(payload) {
       this.isLoading = true;
       this.errorUiMessage = '';
@@ -125,12 +130,6 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.isLoading = false;
       }
-    },
-
-    applyVerifyResult(response) {
-      const result = getApiResult(response);
-      this.userId = result?.userId ?? null;
-      this.syncAccessToken();
     },
 
     async bootstrap() {

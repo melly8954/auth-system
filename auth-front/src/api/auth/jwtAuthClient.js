@@ -27,13 +27,13 @@ export async function login(payload) {
   return response.data;
 }
 
-export async function reissueToken() {
-  const response = await api.post('/api/v1/auth/reissue');
+export async function logout() {
+  const response = await api.post('/api/v1/auth/logout');
   return response.data;
 }
 
-export async function logout() {
-  const response = await api.post('/api/v1/auth/logout');
+export async function reissueToken() {
+  const response = await api.post('/api/v1/auth/reissue');
   return response.data;
 }
 
