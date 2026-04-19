@@ -14,7 +14,7 @@ export function createApiClient(baseURL, options = {}) {
 }
 
 export function getApiResult(response) {
-  return response?.data?.result ?? null;
+  return response?.result ?? null;
 }
 
 export function getApiErrorCode(error) {

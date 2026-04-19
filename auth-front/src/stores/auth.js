@@ -66,33 +66,6 @@ export const useAuthStore = defineStore('auth', {
       this.isAuthenticated = false;
     },
 
-    applyVerifyResult(response) {
-      const result = getApiResult(response);
-      this.userId = result?.userId ?? null;
-      this.syncAccessToken();
-    },
-
-    async bootstrap() {
-      this.isLoading = true;
-      this.errorUiMessage = '';
-
-      try {
-        const reissueResponse = await jwtAuthClient.reissueToken();
-        const reissueResult = getApiResult(reissueResponse);
-
-        this.accessToken = reissueResult?.newAccessToken || '';
-        this.syncAccessToken();
-      } catch (error) {
-        if (!isRefreshTokenFailure(error)) {
-          this.errorUiMessage = getApiErrorMessage(error, '인증 상태를 복구하지 못했습니다.');
-        }
-
-        this.resetState();
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
     async signUp(payload) {
       this.isLoading = true;
       this.errorUiMessage = '';
@@ -124,6 +97,20 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async logout() {
+      this.isLoading = true;
+      this.errorUiMessage = '';
+
+      try {
+        await jwtAuthClient.logout();
+      } catch (error) {
+        this.errorUiMessage = getApiErrorMessage(error, '로그아웃에 실패했습니다.');
+      } finally {
+        this.resetState();
+        this.isLoading = false;
+      }
+    },
+
     async verifyAccessToken() {
       this.isLoading = true;
       this.errorUiMessage = '';
@@ -140,16 +127,29 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async logout() {
+    applyVerifyResult(response) {
+      const result = getApiResult(response);
+      this.userId = result?.userId ?? null;
+      this.syncAccessToken();
+    },
+
+    async bootstrap() {
       this.isLoading = true;
       this.errorUiMessage = '';
 
       try {
-        await jwtAuthClient.logout();
+        const reissueResponse = await jwtAuthClient.reissueToken();
+        const reissueResult = getApiResult(reissueResponse);
+
+        this.accessToken = reissueResult?.newAccessToken || '';
+        this.syncAccessToken();
       } catch (error) {
-        this.errorUiMessage = getApiErrorMessage(error, '로그아웃에 실패했습니다.');
-      } finally {
+        if (!isRefreshTokenFailure(error)) {
+          this.errorUiMessage = getApiErrorMessage(error, '인증 상태를 복구하지 못했습니다.');
+        }
+
         this.resetState();
+      } finally {
         this.isLoading = false;
       }
     },
