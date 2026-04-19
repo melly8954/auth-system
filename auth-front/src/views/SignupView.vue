@@ -40,14 +40,14 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '../stores/auth'
+import { reactive } from 'vue';
+import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '../stores/auth';
 
-const router = useRouter()
-const authStore = useAuthStore()
-const { isLoading } = storeToRefs(authStore)
+const router = useRouter();
+const authStore = useAuthStore();
+const { isLoading } = storeToRefs(authStore);
 
 const form = reactive({
   username: '',
@@ -55,7 +55,7 @@ const form = reactive({
   email: '',
   name: '',
   nickname: '',
-})
+});
 
 async function submit() {
   const response = await authStore.signUp({

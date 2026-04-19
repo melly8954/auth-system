@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia'
-import * as jwtAuthClient from '../api/auth/jwtAuthClient'
-import { getApiErrorCode, getApiErrorMessage, getApiResult } from '../api/http'
-import { JWT_ERROR_CODES } from '../api/errorCodes'
+import { defineStore } from 'pinia';
+import * as jwtAuthClient from '../api/auth/jwtAuthClient';
+import { getApiErrorCode, getApiErrorMessage, getApiResult } from '../api/http';
+import { JWT_ERROR_CODES } from '../api/errorCodes';
 
 let toastTimerId = null;
 
@@ -19,7 +19,6 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     userId: null,
     accessToken: '',
-    tokenVerified: false,
     isAuthenticated: false,
     isLoading: false,
     errorUiMessage: '',
@@ -33,62 +32,59 @@ export const useAuthStore = defineStore('auth', {
       this.toastUiType = type;
 
       if (toastTimerId) {
-        clearTimeout(toastTimerId)
+        clearTimeout(toastTimerId);
       }
 
       toastTimerId = setTimeout(() => {
-        this.hideToast()
-      }, 2500)
+        this.hideToast();
+      }, 2500);
     },
 
     hideToast() {
-      this.toastUiMessage = ''
+      this.toastUiMessage = '';
 
       if (toastTimerId) {
-        clearTimeout(toastTimerId)
-        toastTimerId = null
+        clearTimeout(toastTimerId);
+        toastTimerId = null;
       }
     },
 
     syncAccessToken() {
-      this.accessToken = jwtAuthClient.getAccessToken()
-      this.isAuthenticated = !!this.accessToken
+      this.accessToken = jwtAuthClient.getAccessToken();
+      this.isAuthenticated = !!this.accessToken;
     },
 
     applyLoginResult(response) {
-      const result = getApiResult(response)
+      const result = getApiResult(response);
 
-      this.accessToken = result?.accessToken || jwtAuthClient.getAccessToken()
-      this.isAuthenticated = !!this.accessToken
-      this.tokenVerified = false
+      this.accessToken = result?.accessToken || jwtAuthClient.getAccessToken();
+      this.isAuthenticated = !!this.accessToken;
     },
 
     applyVerifyResult(response) {
-      const result = getApiResult(response)
-      this.userId = result?.userId ?? null
-      this.tokenVerified = !!result?.verified
-      this.syncAccessToken()
+      const result = getApiResult(response);
+      this.userId = result?.userId ?? null;
+      this.syncAccessToken();
     },
 
     async bootstrap() {
-      this.isLoading = true
-      this.errorUiMessage = ''
+      this.isLoading = true;
+      this.errorUiMessage = '';
 
       try {
-        const reissueResponse = await jwtAuthClient.reissueToken()
-        const reissueResult = getApiResult(reissueResponse)
+        const reissueResponse = await jwtAuthClient.reissueToken();
+        const reissueResult = getApiResult(reissueResponse);
 
-        this.accessToken = reissueResult?.newAccessToken || jwtAuthClient.getAccessToken()
-        this.isAuthenticated = !!this.accessToken
-        this.tokenVerified = false
+        this.accessToken = reissueResult?.newAccessToken || jwtAuthClient.getAccessToken();
+        this.isAuthenticated = !!this.accessToken;
       } catch (error) {
         if (!isRefreshTokenFailure(error)) {
-          this.errorUiMessage = getApiErrorMessage(error, '인증 상태를 복구하지 못했습니다.')
+          this.errorUiMessage = getApiErrorMessage(error, '인증 상태를 복구하지 못했습니다.');
         }
 
-        this.resetState()
+        this.resetState();
       } finally {
-        this.isLoading = false
+        this.isLoading = false;
       }
     },
 
@@ -99,16 +95,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         return await jwtAuthClient.signUp(payload);
       } catch (error) {
-        const errorCode = getApiErrorCode(error);
-
-        if (errorCode === JWT_ERROR_CODES.DUPLICATE_USERNAME) {
-          this.errorUiMessage = '이미 사용 중인 아이디입니다.';
-        } else if (errorCode === JWT_ERROR_CODES.DUPLICATE_EMAIL) {
-          this.errorUiMessage = '이미 사용 중인 이메일입니다.';
-        } else {
-          this.errorUiMessage = getApiErrorMessage(error, '회원가입에 실패했습니다.');
-        }
-
+        this.errorUiMessage = getApiErrorMessage(error, '회원가입에 실패했습니다.');
         throw error;
       } finally {
         this.isLoading = false;
@@ -116,60 +103,58 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async login(payload) {
-      this.isLoading = true
-      this.errorUiMessage = ''
+      this.isLoading = true;
+      this.errorUiMessage = '';
 
       try {
-        const response = await jwtAuthClient.login(payload)
-        this.applyLoginResult(response)
-        return response
+        const response = await jwtAuthClient.login(payload);
+        this.applyLoginResult(response);
+        return response;
       } catch (error) {
-        this.resetState()
-        this.errorUiMessage = getApiErrorMessage(error, '로그인에 실패했습니다.')
-        throw error
+        this.resetState();
+        this.errorUiMessage = getApiErrorMessage(error, '로그인에 실패했습니다.');
+        throw error;
       } finally {
-        this.isLoading = false
+        this.isLoading = false;
       }
     },
 
     async verifyAccessToken() {
-      this.isLoading = true
-      this.errorUiMessage = ''
+      this.isLoading = true;
+      this.errorUiMessage = '';
 
       try {
-        const response = await jwtAuthClient.fetchUser()
-        this.applyVerifyResult(response)
-        return response
+        const response = await jwtAuthClient.fetchUser();
+        this.applyVerifyResult(response);
+        return response;
       } catch (error) {
-        this.errorUiMessage = getApiErrorMessage(error, '토큰 검증에 실패했습니다.')
-        this.tokenVerified = false
-        throw error
+        this.errorUiMessage = getApiErrorMessage(error, '토큰 검증에 실패했습니다.');
+        throw error;
       } finally {
-        this.isLoading = false
+        this.isLoading = false;
       }
     },
 
     async logout() {
-      this.isLoading = true
-      this.errorUiMessage = ''
+      this.isLoading = true;
+      this.errorUiMessage = '';
 
       try {
-        await jwtAuthClient.logout()
+        await jwtAuthClient.logout();
       } catch (error) {
-        this.errorUiMessage = getApiErrorMessage(error, '로그아웃에 실패했습니다.')
+        this.errorUiMessage = getApiErrorMessage(error, '로그아웃에 실패했습니다.');
       } finally {
-        this.resetState()
-        this.isLoading = false
+        this.resetState();
+        this.isLoading = false;
       }
     },
 
     resetState() {
-      this.userId = null
-      this.accessToken = ''
-      this.tokenVerified = false
-      this.isAuthenticated = false
-      this.errorUiMessage = ''
-      jwtAuthClient.clearAccessToken()
+      this.userId = null;
+      this.accessToken = '';
+      this.isAuthenticated = false;
+      this.errorUiMessage = '';
+      jwtAuthClient.clearAccessToken();
     },
   },
-})
+});

@@ -1,8 +1,8 @@
-import axios from 'axios'
+import axios from 'axios';
 
 const DEFAULT_HEADERS = {
   'Content-Type': 'application/json',
-}
+};
 
 export function createApiClient(baseURL, options = {}) {
   return axios.create({
@@ -10,17 +10,17 @@ export function createApiClient(baseURL, options = {}) {
     withCredentials: true,
     headers: DEFAULT_HEADERS,
     ...options,
-  })
+  });
 }
 
 export function getApiResult(response) {
-  return response?.data?.result ?? null
+  return response?.data?.result ?? null;
 }
 
 export function getApiErrorCode(error) {
-  return error?.response?.data?.errorCode ?? null
+  return error?.response?.data?.errorCode ?? null;
 }
 
 export function getApiErrorMessage(error, fallbackMessage = '') {
-  return error?.response?.data?.message || fallbackMessage
+  return error?.response?.data?.message || fallbackMessage;
 }

@@ -42,31 +42,31 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '../stores/auth'
+import { reactive } from 'vue';
+import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '../stores/auth';
 
-const router = useRouter()
-const authStore = useAuthStore()
-const { isLoading } = storeToRefs(authStore)
+const router = useRouter();
+const authStore = useAuthStore();
+const { isLoading } = storeToRefs(authStore);
 
-const baseUrl = import.meta.env.VITE_JWT_API_BASE_URL || 'http://localhost:8081'
-const googleLoginUrl = `${baseUrl}/oauth2/authorization/google`
-const kakaoLoginUrl = `${baseUrl}/oauth2/authorization/kakao`
+const baseUrl = import.meta.env.VITE_JWT_API_BASE_URL || 'http://localhost:8081';
+const googleLoginUrl = `${baseUrl}/oauth2/authorization/google`;
+const kakaoLoginUrl = `${baseUrl}/oauth2/authorization/kakao`;
 
 const form = reactive({
   username: '',
   password: '',
-})
+});
 
 async function submit() {
-  await authStore.login({
+  const response = await authStore.login({
     username: form.username,
     password: form.password,
-  })
+  });
 
   authStore.showToast(response?.message);
-  router.push('/')
+  router.push('/');
 }
 </script>

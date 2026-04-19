@@ -15,10 +15,6 @@
         <strong>{{ isAuthenticated ? 'true' : 'false' }}</strong>
       </article>
       <article class="summary-card">
-        <span>Token Verified</span>
-        <strong>{{ tokenVerified ? 'true' : 'false' }}</strong>
-      </article>
-      <article class="summary-card">
         <span>User ID</span>
         <strong>{{ userId ?? '-' }}</strong>
       </article>
@@ -50,9 +46,9 @@
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '../stores/auth'
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '../stores/auth';
 
-const authStore = useAuthStore()
-const { userId, isAuthenticated, accessToken, isLoading, tokenVerified } = storeToRefs(authStore)
+const authStore = useAuthStore();
+const { userId, isAuthenticated, accessToken, isLoading } = storeToRefs(authStore);
 </script>

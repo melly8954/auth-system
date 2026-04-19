@@ -38,9 +38,9 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from './stores/auth'
+import { onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from './stores/auth';
 
 const authStore = useAuthStore();
 const { errorUiMessage, toastUiMessage, toastUiType } = storeToRefs(authStore);
