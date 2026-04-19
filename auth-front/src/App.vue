@@ -40,7 +40,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useAuthStore } from './stores/auth';
+import { useAuthStore } from './stores/authStore';
 
 const authStore = useAuthStore();
 const { errorUiMessage, toastUiMessage, toastUiType } = storeToRefs(authStore);

@@ -1,21 +1,75 @@
-import { useAuthStore } from '../../stores/auth';
+import { useAuthStore } from '../../stores/authStore';
 import { createApiClient } from '../http';
 
 const baseURL = import.meta.env.VITE_JWT_API_BASE_URL;
 const api = createApiClient(baseURL);
 
-api.interceptors.request.use((config) => {
-  const authStore = useAuthStore();
-  const accessToken = authStore.accessToken;
+// Axios 인터셉터
+//  - 요청(Request) 또는 응답(Response)이 처리되기 전에 가로채서 특정 로직을 수행하도록 하는 기능이다.
 
-  if (!accessToken) {
+// 요청(Request) 인터셉터
+//  - HTTP 요청이 서버로 전송되기 전에 실행된다.
+api.interceptors.request.use(
+  (config) => {
+    // 모든 요청에 JWT 토큰을 헤더에 추가하도록 요청(Request) 인터셉터를 구현
+    // config는 Axios가 요청을 보내기 전에 사용하는 요청 설정 객체
+    // (url, method, headers, params, data 등 요청에 대한 모든 정보 포함)
+
+    // Pinia Store에서 accessToken을 가져온다.
+    const authStore = useAuthStore();
+    const accessToken = authStore.accessToken;
+
+    config.headers = config.headers || {};
+
+    // accessToken을 검증 후 Authorization 헤더에 accessToken을 추가한다.
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    // config를 반환해야 요청이 계속 진행됨
     return config;
-  }
+  },
+  (error) => {
+    // 비동기 코드에서 에러를 처리하거나 에러를 즉시 반환할 때 사용한다.
+    return Promise.reject(error);
+  },
+);
 
-  config.headers = config.headers || {};
-  config.headers.Authorization = `Bearer ${accessToken}`;
-  return config;
-});
+// 응답(Response) 인터셉터
+//  - 서버에서 HTTP 응답이 도착한 후에 실행된다.
+api.interceptors.response.use(
+  // (response) => {
+  //   return response;
+  // },
+  (response) => response,
+
+  // 액세스 토큰이 만료되면 액세스 토큰을 재발급 받아서 요청을 다시 시도하도록 구현
+  async (error) => {
+    // 이전 요청에 대한 config 객체를 얻어온다.
+    const originConfig = error.config;
+
+    // 토큰이 만료되어 401 에러가 발생한 경우
+    if (error.response?.status === 401 && !originConfig?._retry) {
+      originConfig._retry = true;
+      const authStore = useAuthStore();
+
+      try {
+        // 리프레시 토큰을 사용하여 새 액세스 토큰을 요청한다.
+        await authStore.bootstrap();
+
+        // 실패했던 원래 요청을 다시 재시도
+        return api(originConfig);
+
+      } catch (error) {
+        // 리프레시 토큰도 만료된 경우, 로그아웃 처리
+        authStore.resetState();
+        return Promise.reject(error);
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
 
 export async function signUp(payload) {
   const response = await api.post('/api/v1/users', payload);
