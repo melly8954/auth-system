@@ -57,7 +57,7 @@ export const useAuthStore = defineStore('auth', {
       const result = getApiResult(response);
 
       this.accessToken = result?.accessToken || '';
-      this.isAuthenticated = !!this.accessToken;
+      this.syncAccessToken();
     },
 
     resetState() {
@@ -81,7 +81,7 @@ export const useAuthStore = defineStore('auth', {
         const reissueResult = getApiResult(reissueResponse);
 
         this.accessToken = reissueResult?.newAccessToken || '';
-        this.isAuthenticated = !!this.accessToken;
+        this.syncAccessToken();
       } catch (error) {
         if (!isRefreshTokenFailure(error)) {
           this.errorUiMessage = getApiErrorMessage(error, '인증 상태를 복구하지 못했습니다.');
