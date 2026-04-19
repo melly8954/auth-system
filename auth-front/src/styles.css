@@ -1,0 +1,258 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #14213d;
+  background:
+    radial-gradient(circle at top left, rgba(244, 162, 97, 0.28), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(42, 157, 143, 0.22), transparent 28%),
+    linear-gradient(135deg, #fefae0 0%, #f4f1de 45%, #ffffff 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+code {
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.45rem;
+  background: rgba(20, 33, 61, 0.08);
+  font-size: 0.9em;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 1.5rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d97706;
+}
+
+.hero h1,
+.panel h2 {
+  margin: 0;
+}
+
+.hero-copy,
+.description,
+.hint {
+  color: rgba(20, 33, 61, 0.8);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.sidebar,
+.content,
+.stack,
+.stack-sm {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel,
+.status-card,
+.summary-card {
+  border: 1px solid rgba(20, 33, 61, 0.08);
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 40px rgba(20, 33, 61, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.panel {
+  padding: 1.25rem;
+}
+
+.status-card {
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.status-card p,
+.summary-card span,
+.summary-card strong {
+  margin: 0;
+}
+
+.status-card p {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.status-card span,
+.summary-card span {
+  color: rgba(20, 33, 61, 0.62);
+}
+
+.mode-toggle,
+.actions,
+.nav-links,
+.summary-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mode-toggle {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.mode-button,
+.primary-button,
+.secondary-button {
+  border: none;
+  border-radius: 0.95rem;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.mode-button {
+  background: rgba(20, 33, 61, 0.08);
+  color: #14213d;
+  font-weight: 600;
+}
+
+.mode-button.active,
+.primary-button {
+  background: linear-gradient(135deg, #14213d 0%, #1d3557 100%);
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(29, 53, 87, 0.22);
+}
+
+.secondary-button {
+  background: #e9c46a;
+  color: #14213d;
+  font-weight: 700;
+}
+
+.mode-button:hover,
+.primary-button:hover,
+.secondary-button:hover {
+  transform: translateY(-1px);
+}
+
+.mode-button:disabled,
+.primary-button:disabled,
+.secondary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.nav-links a {
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: rgba(42, 157, 143, 0.12);
+  font-weight: 600;
+}
+
+.nav-links a.router-link-active {
+  background: rgba(42, 157, 143, 0.26);
+}
+
+.summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary-card {
+  padding: 1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.form-card {
+  max-width: 720px;
+}
+
+.field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field span {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.field input {
+  border: 1px solid rgba(20, 33, 61, 0.14);
+  border-radius: 0.9rem;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.field input:focus {
+  outline: 2px solid rgba(42, 157, 143, 0.34);
+  border-color: rgba(42, 157, 143, 0.55);
+}
+
+.error-panel,
+.error-text {
+  color: #b42318;
+}
+
+.stack-sm {
+  gap: 0.35rem;
+}
+
+@media (max-width: 920px) {
+  .hero,
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell {
+    padding: 1rem 0.9rem 2rem;
+  }
+
+  .summary-grid,
+  .mode-toggle {
+    grid-template-columns: 1fr;
+  }
+}
