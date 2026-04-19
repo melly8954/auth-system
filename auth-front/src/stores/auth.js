@@ -50,15 +50,20 @@ export const useAuthStore = defineStore('auth', {
     },
 
     syncAccessToken() {
-      this.accessToken = jwtAuthClient.getAccessToken();
       this.isAuthenticated = !!this.accessToken;
     },
 
     applyLoginResult(response) {
       const result = getApiResult(response);
 
-      this.accessToken = result?.accessToken || jwtAuthClient.getAccessToken();
+      this.accessToken = result?.accessToken || '';
       this.isAuthenticated = !!this.accessToken;
+    },
+
+    resetState() {
+      this.userId = null;
+      this.accessToken = '';
+      this.isAuthenticated = false;
     },
 
     applyVerifyResult(response) {
@@ -75,7 +80,7 @@ export const useAuthStore = defineStore('auth', {
         const reissueResponse = await jwtAuthClient.reissueToken();
         const reissueResult = getApiResult(reissueResponse);
 
-        this.accessToken = reissueResult?.newAccessToken || jwtAuthClient.getAccessToken();
+        this.accessToken = reissueResult?.newAccessToken || '';
         this.isAuthenticated = !!this.accessToken;
       } catch (error) {
         if (!isRefreshTokenFailure(error)) {
@@ -147,14 +152,6 @@ export const useAuthStore = defineStore('auth', {
         this.resetState();
         this.isLoading = false;
       }
-    },
-
-    resetState() {
-      this.userId = null;
-      this.accessToken = '';
-      this.isAuthenticated = false;
-      this.errorUiMessage = '';
-      jwtAuthClient.clearAccessToken();
     },
   },
 });

@@ -1,11 +1,13 @@
-import { createApiClient, getApiResult } from '../http';
+import { useAuthStore } from '../../stores/auth';
+import { createApiClient } from '../http';
 
 const baseURL = import.meta.env.VITE_JWT_API_BASE_URL;
 const api = createApiClient(baseURL);
 
-let accessToken = '';
-
 api.interceptors.request.use((config) => {
+  const authStore = useAuthStore();
+  const accessToken = authStore.accessToken;
+
   if (!accessToken) {
     return config;
   }
@@ -15,71 +17,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-function applyAuthorizationHeader(token) {
-  accessToken = token || '';
-
-  if (accessToken) {
-    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-    return;
-  }
-
-  delete api.defaults.headers.common.Authorization;
-}
-
-export function getAccessToken() {
-  return accessToken;
-}
-
-export function clearAccessToken() {
-  applyAuthorizationHeader('');
-}
-
 export async function signUp(payload) {
-  try {
-    const response = await api.post('/api/v1/users', payload);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post('/api/v1/users', payload);
+  return response.data;
 }
 
 export async function login(payload) {
-  try {
-    const response = await api.post('/api/v1/auth/login', payload);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post('/api/v1/auth/login', payload);
+  return response.data;
 }
 
 export async function reissueToken() {
-  try {
-    const response = await api.post('/api/v1/auth/reissue');
-    const token = getApiResult(response)?.newAccessToken || '';
-    applyAuthorizationHeader(token);
-    return response.data;
-  } catch (error) {
-    clearAccessToken();
-    throw error;
-  }
+  const response = await api.post('/api/v1/auth/reissue');
+  return response.data;
 }
 
 export async function logout() {
-  try {
-    const response = await api.post('/api/v1/auth/logout');
-    clearAccessToken();
-    return response.data;
-  } catch (error) {
-    clearAccessToken();
-    throw error;
-  }
+  const response = await api.post('/api/v1/auth/logout');
+  return response.data;
 }
 
 export async function fetchUser() {
-  try {
-    const response = await api.get('/api/v1/tests/user');
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.get('/api/v1/tests/user');
+  return response.data;
 }
