@@ -5,8 +5,7 @@
         <p class="eyebrow">Login</p>
         <h2>일반 로그인</h2>
         <p class="description">
-          아이디와 비밀번호로 로그인하면 응답의 `username`, `role`, `accessToken`으로 store를
-          채웁니다.
+          <code>POST /api/v1/auth/login</code>으로 로그인을 요청합니다.
         </p>
       </div>
 
@@ -17,12 +16,7 @@
 
       <label class="field">
         <span>Password</span>
-        <input
-          v-model.trim="form.password"
-          type="password"
-          autocomplete="current-password"
-          required
-        />
+        <input v-model.trim="form.password" type="password" autocomplete="current-password" required />
       </label>
 
       <button type="submit" class="primary-button" :disabled="isLoading">
@@ -72,6 +66,7 @@ async function submit() {
     password: form.password,
   })
 
+  authStore.showToast(response?.message);
   router.push('/')
 }
 </script>
