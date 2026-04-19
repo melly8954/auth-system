@@ -11,6 +11,8 @@ import com.authsystem.authsession.auth.service.CustomAuthorizationRequestResolve
 import com.authsystem.authsession.auth.service.PrincipalOAuth2UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,10 +30,16 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableConfigurationProperties(SecurityConfig.CorsProperties.class)
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
@@ -42,6 +50,7 @@ public class SecurityConfig {
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CorsProperties corsProperties;
 
     /*
         Client → JsonLoginFilter → AuthenticationManager → AuthenticationProvider
@@ -126,6 +135,21 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(corsProperties.allowedOrigins());
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Set-Cookie"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
     /*
     AuthenticationManager
         - 인증의 총괄 관리자인 AuthenticationManager를 직접 생성 및 등록한다.
@@ -180,5 +204,9 @@ public class SecurityConfig {
         filter.setAuthenticationFailureHandler(loginFailureHandler);
 
         return filter;
+    }
+
+    @ConfigurationProperties(prefix = "app.cors")
+    public record CorsProperties(List<String> allowedOrigins) {
     }
 }

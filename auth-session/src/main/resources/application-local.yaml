@@ -38,3 +38,8 @@ spring:
             issuer-uri: https://kauth.kakao.com
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: sub
+
+app:
+  cors:
+    allowed-origins:
+      - http://localhost:5173

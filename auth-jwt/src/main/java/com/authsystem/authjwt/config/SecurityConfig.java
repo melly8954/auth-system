@@ -14,6 +14,8 @@ import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
 import com.authsystem.authjwt.auth.service.PrincipalOAuth2UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,10 +30,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableConfigurationProperties(SecurityConfig.CorsProperties.class)
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
@@ -45,6 +53,7 @@ public class SecurityConfig {
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CorsProperties corsProperties;
 
     /*
         [AuthenticationManager 주입 방식]
@@ -140,6 +149,42 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
+    /*
+        CORS(Cross-Origin Resource Sharing) 설정
+        프론트엔드(다른 도메인)의 API 접근 권한을 관리합니다.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // 1. 허용할 출처(Origin) 설정
+        configuration.setAllowedOrigins(corsProperties.allowedOrigins());
+
+        // 2. 허용할 HTTP 메서드 설정
+        // OPTIONS는 브라우저의 사전 검사(Preflight) 요청을 위해 필요합니다.
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+
+        // 3. 허용할 요청 헤더 설정: 모든 헤더를 허용하도록 설정
+        configuration.setAllowedHeaders(List.of("*"));
+
+        // 4. 클라이언트(JS)에서 읽을 수 있도록 노출할 응답 헤더 설정
+        // 로그인 토큰(Authorization) 및 세션 쿠키 확인을 위해 필요합니다.
+        configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+
+        // 5. 인증 정보(쿠키, 자격 증명) 포함 요청 허용 여부
+        // true 설정 시 AllowedOrigins에 와일드카드(*)를 사용할 수 없습니다.
+        configuration.setAllowCredentials(true);
+
+        // 6. Preflight(사전 검사) 요청의 캐싱 시간 설정 (3600초 = 1시간)
+        // 설정 시간 동안 브라우저는 반복적인 검사 요청을 보내지 않습니다.
+        configuration.setMaxAge(3600L);
+
+        // 모든 경로("/**")에 대해 위에서 정의한 CORS 정책을 적용합니다.
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
     // 직접 생성한 필터를 등록
     private JsonLoginFilter createJsonLoginFilter(AuthenticationManager authenticationManager) {
         JsonLoginFilter filter = new JsonLoginFilter(new ObjectMapper());
@@ -152,6 +197,10 @@ public class SecurityConfig {
         filter.setAuthenticationFailureHandler(loginFailureHandler);
 
         return filter;
+    }
+
+    @ConfigurationProperties(prefix = "app.cors")
+    public record CorsProperties(List<String> allowedOrigins) {
     }
 }
 
