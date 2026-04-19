@@ -15,13 +15,13 @@
         <strong>{{ isAuthenticated ? 'true' : 'false' }}</strong>
       </article>
       <article class="summary-card">
-        <span>User ID</span>
-        <strong>{{ userId ?? '-' }}</strong>
-      </article>
-      <article class="summary-card">
         <span>Access Token</span>
         <strong>{{ accessToken ? 'set' : 'empty' }}</strong>
       </article>
+      <article class="summary-card">
+        <span>User ID</span>
+        <strong>{{ userId ?? '-' }}</strong>
+      </article>      
     </div>
 
     <div class="actions">
