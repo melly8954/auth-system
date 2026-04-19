@@ -14,6 +14,9 @@ api.interceptors.request.use(
     // 모든 요청에 JWT 토큰을 헤더에 추가하도록 요청(Request) 인터셉터를 구현
     // config는 Axios가 요청을 보내기 전에 사용하는 요청 설정 객체
     // (url, method, headers, params, data 등 요청에 대한 모든 정보 포함)
+    if (config._skipAuthRefresh) {
+      return config;
+    }
 
     // Pinia Store에서 accessToken을 가져온다.
     const authStore = useAuthStore();
@@ -47,6 +50,10 @@ api.interceptors.response.use(
   async (error) => {
     // 이전 요청에 대한 config 객체를 얻어온다.
     const originConfig = error.config;
+
+    if (originConfig?._skipAuthRefresh) {
+      return Promise.reject(error);
+    }
 
     // 토큰이 만료되어 401 에러가 발생한 경우
     if (error.response?.status === 401 && !originConfig?._retry) {
@@ -87,7 +94,7 @@ export async function logout() {
 }
 
 export async function reissueToken() {
-  const response = await api.post('/api/v1/auth/reissue');
+  const response = await api.post('/api/v1/auth/reissue', {}, { _skipAuthRefresh: true });
   return response.data;
 }
 
