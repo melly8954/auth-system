@@ -1,3 +1,52 @@
+<template>
+  <div class="stack">
+    <form class="panel form-card" @submit.prevent="submit">
+      <div class="stack-sm">
+        <p class="eyebrow">Login</p>
+        <h2>일반 로그인</h2>
+        <p class="description">
+          아이디와 비밀번호로 로그인하면 응답의 `username`, `role`, `accessToken`으로 store를
+          채웁니다.
+        </p>
+      </div>
+
+      <label class="field">
+        <span>Username</span>
+        <input v-model.trim="form.username" type="text" autocomplete="username" required />
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input
+          v-model.trim="form.password"
+          type="password"
+          autocomplete="current-password"
+          required
+        />
+      </label>
+
+      <button type="submit" class="primary-button" :disabled="isLoading">
+        {{ isLoading ? '처리 중...' : '로그인' }}
+      </button>
+    </form>
+
+    <section class="panel form-card">
+      <div class="stack-sm">
+        <p class="eyebrow">Social Login</p>
+        <h2>소셜 로그인</h2>
+        <p class="description">
+          OAuth2 인증은 백엔드의 `/oauth2/authorization/{provider}` 엔드포인트로 바로 이동합니다.
+        </p>
+      </div>
+
+      <div class="social-actions">
+        <a class="social-button google" :href="googleLoginUrl">Google로 로그인</a>
+        <a class="social-button kakao" :href="kakaoLoginUrl">Kakao로 로그인</a>
+      </div>
+    </section>
+  </div>
+</template>
+
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
@@ -6,7 +55,11 @@ import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const { authMode, isLoading, errorMessage } = storeToRefs(authStore)
+const { isLoading } = storeToRefs(authStore)
+
+const baseUrl = import.meta.env.VITE_JWT_API_BASE_URL || 'http://localhost:8081'
+const googleLoginUrl = `${baseUrl}/oauth2/authorization/google`
+const kakaoLoginUrl = `${baseUrl}/oauth2/authorization/kakao`
 
 const form = reactive({
   username: '',
@@ -22,37 +75,3 @@ async function submit() {
   router.push('/')
 }
 </script>
-
-<template>
-  <form class="panel form-card" @submit.prevent="submit">
-    <div class="stack-sm">
-      <p class="eyebrow">Login</p>
-      <h2>{{ authMode === 'session' ? '세션 로그인' : 'JWT 로그인' }}</h2>
-      <p class="description">
-        두 모드 모두 <code>/api/v1/auth/login</code>을 사용하고, JWT 모드만 access token을 응답으로
-        받습니다.
-      </p>
-    </div>
-
-    <label class="field">
-      <span>Username</span>
-      <input v-model.trim="form.username" type="text" autocomplete="username" required />
-    </label>
-
-    <label class="field">
-      <span>Password</span>
-      <input
-        v-model.trim="form.password"
-        type="password"
-        autocomplete="current-password"
-        required
-      />
-    </label>
-
-    <button type="submit" class="primary-button" :disabled="isLoading">
-      {{ isLoading ? '처리 중...' : '로그인' }}
-    </button>
-
-    <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-  </form>
-</template>

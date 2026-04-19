@@ -1,55 +1,69 @@
 import { defineStore } from 'pinia'
-import * as sessionAuthClient from '../api/auth/sessionAuthClient'
 import * as jwtAuthClient from '../api/auth/jwtAuthClient'
+import { getApiErrorCode, getApiResult } from '../api/http'
+import { JWT_ERROR_CODES } from '../api/errorCodes'
 
-const STORAGE_KEY = 'auth-system-mode'
-
-function normalizeUserId(response) {
-  return response?.data ?? null
+function isRefreshTokenFailure(error) {
+  const errorCode = getApiErrorCode(error)
+  return (
+    errorCode === JWT_ERROR_CODES.REFRESH_TOKEN_NOT_FOUND ||
+    errorCode === JWT_ERROR_CODES.REFRESH_TOKEN_EXPIRED ||
+    errorCode === JWT_ERROR_CODES.REFRESH_TOKEN_INVALID ||
+    errorCode === JWT_ERROR_CODES.REFRESH_TOKEN_NOT_IN_REDIS
+  )
 }
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    authMode: import.meta.env.VITE_AUTH_MODE || 'session',
     userId: null,
+    accessToken: '',
+    tokenVerified: false,
     isAuthenticated: false,
     isLoading: false,
     errorMessage: '',
   }),
 
-  getters: {
-    activeClient(state) {
-      return state.authMode === 'jwt' ? jwtAuthClient : sessionAuthClient
-    },
-    accessToken() {
-      return jwtAuthClient.getAccessToken()
-    },
-  },
-
   actions: {
-    async bootstrap() {
-      const savedMode = localStorage.getItem(STORAGE_KEY)
-
-      if (savedMode === 'session' || savedMode === 'jwt') {
-        this.authMode = savedMode
-      }
-
-      await this.restoreSession()
+    syncAccessToken() {
+      this.accessToken = jwtAuthClient.getAccessToken()
+      this.isAuthenticated = !!this.accessToken
     },
 
-    async setAuthMode(mode) {
-      if (mode !== 'session' && mode !== 'jwt') {
-        return
-      }
+    applyLoginResult(response) {
+      const result = getApiResult(response)
 
-      if (this.authMode === mode) {
-        return
-      }
+      this.accessToken = result?.accessToken || jwtAuthClient.getAccessToken()
+      this.isAuthenticated = !!this.accessToken
+      this.tokenVerified = false
+    },
 
-      this.authMode = mode
-      localStorage.setItem(STORAGE_KEY, mode)
-      this.resetState()
-      await this.restoreSession()
+    applyVerifyResult(response) {
+      const result = getApiResult(response)
+      this.userId = result?.userId ?? null
+      this.tokenVerified = !!result?.verified
+      this.syncAccessToken()
+    },
+
+    async bootstrap() {
+      this.isLoading = true
+      this.errorMessage = ''
+
+      try {
+        const reissueResponse = await jwtAuthClient.reissueToken()
+        const reissueResult = getApiResult(reissueResponse)
+
+        this.accessToken = reissueResult?.newAccessToken || jwtAuthClient.getAccessToken()
+        this.isAuthenticated = !!this.accessToken
+        this.tokenVerified = false
+      } catch (error) {
+        if (!isRefreshTokenFailure(error)) {
+          this.errorMessage = error.message || ''
+        }
+
+        this.resetState()
+      } finally {
+        this.isLoading = false
+      }
     },
 
     async signUp(payload) {
@@ -57,7 +71,7 @@ export const useAuthStore = defineStore('auth', {
       this.errorMessage = ''
 
       try {
-        return await this.activeClient.signUp(payload)
+        return await jwtAuthClient.signUp(payload)
       } catch (error) {
         this.errorMessage = error.message
         throw error
@@ -71,13 +85,29 @@ export const useAuthStore = defineStore('auth', {
       this.errorMessage = ''
 
       try {
-        const response = await this.activeClient.login(payload)
-        await this.restoreSession()
+        const response = await jwtAuthClient.login(payload)
+        this.applyLoginResult(response)
         return response
       } catch (error) {
+        this.resetState()
         this.errorMessage = error.message
-        this.isAuthenticated = false
-        this.userId = null
+        throw error
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    async verifyAccessToken() {
+      this.isLoading = true
+      this.errorMessage = ''
+
+      try {
+        const response = await jwtAuthClient.fetchUser()
+        this.applyVerifyResult(response)
+        return response
+      } catch (error) {
+        this.errorMessage = error.message || ''
+        this.tokenVerified = false
         throw error
       } finally {
         this.isLoading = false
@@ -89,7 +119,7 @@ export const useAuthStore = defineStore('auth', {
       this.errorMessage = ''
 
       try {
-        await this.activeClient.logout()
+        await jwtAuthClient.logout()
       } catch (error) {
         this.errorMessage = error.message
       } finally {
@@ -98,32 +128,10 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async restoreSession() {
-      this.isLoading = true
-      this.errorMessage = ''
-
-      try {
-        if (this.authMode === 'jwt' && !this.accessToken) {
-          await jwtAuthClient.reissueToken()
-        }
-
-        const response = await this.activeClient.fetchUser()
-        this.userId = normalizeUserId(response)
-        this.isAuthenticated = this.userId !== null
-      } catch (error) {
-        if (this.authMode === 'jwt') {
-          jwtAuthClient.clearAccessToken()
-        }
-
-        this.userId = null
-        this.isAuthenticated = false
-      } finally {
-        this.isLoading = false
-      }
-    },
-
     resetState() {
       this.userId = null
+      this.accessToken = ''
+      this.tokenVerified = false
       this.isAuthenticated = false
       this.errorMessage = ''
       jwtAuthClient.clearAccessToken()

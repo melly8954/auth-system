@@ -13,11 +13,10 @@ export function createApiClient(baseURL, options = {}) {
   })
 }
 
-export function extractErrorMessage(error, fallbackMessage) {
-  return (
-    error?.response?.data?.message ||
-    error?.response?.data?.error ||
-    error?.message ||
-    fallbackMessage
-  )
+export function getApiResult(response) {
+  return response?.data?.result ?? null
+}
+
+export function getApiErrorCode(error) {
+  return error?.response?.data?.errorCode ?? null
 }
