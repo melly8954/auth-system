@@ -14,8 +14,8 @@ public enum ErrorType {
 
     // auth
     ACCESS_TOKEN_NOT_FOUND("auth_access_001", "Access Token을 요청받지 못했습니다.", HttpStatus.BAD_REQUEST),
-    ACCESS_TOKEN_EXPIRED("auth_access_002", "만료된 Access Token입니다.", HttpStatus.CONFLICT),
-    ACCESS_TOKEN_INVALID("auth_access_003", "유효하지 않은 Access Token입니다.", HttpStatus.CONFLICT),
+    ACCESS_TOKEN_EXPIRED("auth_access_002", "만료된 Access Token입니다.", HttpStatus.UNAUTHORIZED),
+    ACCESS_TOKEN_INVALID("auth_access_003", "유효하지 않은 Access Token입니다.", HttpStatus.UNAUTHORIZED),
     ACCESS_TOKEN_OF_BLACK_LIST("auth_access_004", "해당 Access Token은 BlackList 토큰입니다.", HttpStatus.CONFLICT),
 
     REFRESH_TOKEN_NOT_FOUND("auth_refresh_001", "Refresh Token을 요청받지 못했습니다.", HttpStatus.BAD_REQUEST),
