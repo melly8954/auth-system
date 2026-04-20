@@ -1,4 +1,5 @@
 import { useAuthStore } from "../../stores/authStore";
+import { isAccessTokenError, mapApiError } from "../apiErrorMapper";
 import { createApiClient } from "../http";
 
 const baseURL = import.meta.env.VITE_JWT_API_BASE_URL;
@@ -54,7 +55,7 @@ api.interceptors.response.use(
     }
 
     // 토큰이 만료되어 401 에러가 발생한 경우
-    if (error.response?.status === 401 && !originConfig?._retry) {
+    if (error.response?.status === 401 && !originConfig?._retry && isAccessTokenError(error)) {
       originConfig._retry = true;
       const authStore = useAuthStore();
 
@@ -63,12 +64,16 @@ api.interceptors.response.use(
         await authStore.tokenRefresh();
         // 실패했던 원래 요청을 다시 재시도
         return api(originConfig);
-      } catch (error) {
-        const refreshFailureMessage = getApiErrorMessage(error, "인증 상태를 복구하지 못했습니다.");
+      } catch (refreshError) {
+        const mappedError = mapApiError(refreshError, {
+          fallbackMessage: "인증 상태를 복구하지 못했습니다.",
+          stage: "refresh",
+        });
 
-        authStore.errorUiMessage = refreshFailureMessage;
-        authStore.showToast(refreshFailureMessage);
-        return Promise.reject(error);
+        refreshError.mappedError = mappedError;
+        authStore.errorUiMessage = mappedError.uiMessage;
+        authStore.showToast(mappedError.uiMessage, 'error');
+        return Promise.reject(refreshError);
       }
     }
 

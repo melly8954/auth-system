@@ -36,13 +36,14 @@ export function mapApiError(error, options = {}) {
   const status = error?.response?.status ?? null;
   const errorCode = getApiErrorCode(error);
   const serverMessage = getApiErrorMessage(error, "");
+  const fallbackMessage = options.fallbackMessage || "오류가 발생했습니다.";
 
   const mappedError = {
     originalError: error,
     status,
     errorCode,
     message: serverMessage,
-    uiMessage: serverMessage,
+    uiMessage: serverMessage || fallbackMessage,
     domain: "unknown",
     stage: options.stage || null,
     shouldLogout: false,
@@ -50,7 +51,7 @@ export function mapApiError(error, options = {}) {
 
   if (!error?.response) {
     mappedError.domain = "network";
-    mappedError.uiMessage = "네트워크 오류가 발생했습니다.";
+    mappedError.uiMessage = fallbackMessage;
     return mappedError;
   }
 

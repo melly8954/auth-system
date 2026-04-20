@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import * as jwtAuthClient from '../api/auth/jwtAuthClient';
-import { getApiErrorCode, getApiErrorMessage, getApiResult } from '../api/http';
+import { mapApiError } from '../api/apiErrorMapper';
+import { getApiResult } from '../api/http';
 
 let toastTimerId = null;
 
@@ -60,6 +61,19 @@ export const useAuthStore = defineStore('auth', {
       this.userId = result ?? null;
     },
 
+    applyMappedError(error, fallbackMessage, options = {}) {
+      const mappedError = error?.mappedError || mapApiError(error, {
+        fallbackMessage,
+        ...options,
+      });
+
+      if (!this.errorUiMessage) {
+        this.errorUiMessage = mappedError.uiMessage;
+      }
+
+      return mappedError;
+    },
+
     async signUp(payload) {
       this.isLoading = true;
       this.errorUiMessage = '';
@@ -67,7 +81,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         return await jwtAuthClient.signUp(payload);
       } catch (error) {
-        this.errorUiMessage = getApiErrorMessage(error, '회원가입에 실패했습니다.');
+        this.applyMappedError(error, '회원가입에 실패했습니다.');
         throw error;
       } finally {
         this.isLoading = false;
@@ -84,7 +98,7 @@ export const useAuthStore = defineStore('auth', {
         return response;
       } catch (error) {
         this.resetState();
-        this.errorUiMessage = getApiErrorMessage(error, '로그인에 실패했습니다.');
+        this.applyMappedError(error, '로그인에 실패했습니다.', { stage: 'login' });
         throw error;
       } finally {
         this.isLoading = false;
@@ -98,7 +112,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         await jwtAuthClient.logout();
       } catch (error) {
-        this.errorUiMessage = getApiErrorMessage(error, '로그아웃에 실패했습니다.');
+        this.applyMappedError(error, '로그아웃에 실패했습니다.', { stage: 'logout' });
       } finally {
         this.resetState();
         this.isLoading = false;
@@ -114,7 +128,7 @@ export const useAuthStore = defineStore('auth', {
         this.applyVerifyResult(response);
         return response;
       } catch (error) {
-        this.errorUiMessage = getApiErrorMessage(error, '토큰 검증에 실패했습니다.');
+        this.applyMappedError(error, '토큰 검증에 실패했습니다.', { stage: 'access' });
         throw error;
       } finally {
         this.isLoading = false;
