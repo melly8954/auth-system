@@ -110,7 +110,8 @@ export const useAuthStore = defineStore('auth', {
       this.errorUiMessage = '';
 
       try {
-        await jwtAuthClient.logout();
+        const response = await jwtAuthClient.logout();
+        this.showToast(response?.message);
       } catch (error) {
         this.applyMappedError(error, '로그아웃에 실패했습니다.', { stage: 'logout' });
       } finally {
@@ -126,6 +127,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await jwtAuthClient.fetchUser();
         this.applyVerifyResult(response);
+        this.showToast(response?.message);
         return response;
       } catch (error) {
         this.applyMappedError(error, '토큰 검증에 실패했습니다.', { stage: 'access' });
