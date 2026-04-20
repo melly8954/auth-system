@@ -1,5 +1,5 @@
-import { useAuthStore } from '../../stores/authStore';
-import { createApiClient } from '../http';
+import { useAuthStore } from "../../stores/authStore";
+import { createApiClient } from "../http";
 
 const baseURL = import.meta.env.VITE_JWT_API_BASE_URL;
 const api = createApiClient(baseURL);
@@ -32,10 +32,8 @@ api.interceptors.request.use(
     // config를 반환해야 요청이 계속 진행됨
     return config;
   },
-  (error) => {
-    // 비동기 코드에서 에러를 처리하거나 에러를 즉시 반환할 때 사용한다.
-    return Promise.reject(error);
-  },
+  // 비동기 코드에서 에러를 처리하거나 에러를 즉시 반환할 때 사용한다.
+  (error) => Promise.reject(error),
 );
 
 // 응답(Response) 인터셉터
@@ -63,13 +61,13 @@ api.interceptors.response.use(
       try {
         // 리프레시 토큰을 사용하여 새 액세스 토큰을 요청한다.
         await authStore.bootstrap();
-
         // 실패했던 원래 요청을 다시 재시도
         return api(originConfig);
-
       } catch (error) {
-        // 리프레시 토큰도 만료된 경우, 로그아웃 처리
-        authStore.resetState();
+        const refreshFailureMessage = getApiErrorMessage(error, "인증 상태를 복구하지 못했습니다.");
+
+        authStore.errorUiMessage = refreshFailureMessage;
+        authStore.showToast(refreshFailureMessage);
         return Promise.reject(error);
       }
     }
@@ -79,26 +77,30 @@ api.interceptors.response.use(
 );
 
 export async function signUp(payload) {
-  const response = await api.post('/api/v1/users', payload);
+  const response = await api.post("/api/v1/users", payload);
   return response.data;
 }
 
 export async function login(payload) {
-  const response = await api.post('/api/v1/auth/login', payload);
+  const response = await api.post("/api/v1/auth/login", payload);
   return response.data;
 }
 
 export async function logout() {
-  const response = await api.post('/api/v1/auth/logout');
+  const response = await api.post("/api/v1/auth/logout");
   return response.data;
 }
 
 export async function reissueToken() {
-  const response = await api.post('/api/v1/auth/reissue', {}, { _skipAuthRefresh: true });
+  const response = await api.post(
+    "/api/v1/auth/reissue",
+    {},
+    { _skipAuthRefresh: true },
+  );
   return response.data;
 }
 
 export async function fetchUser() {
-  const response = await api.get('/api/v1/tests/user');
+  const response = await api.get("/api/v1/tests/user");
   return response.data;
 }

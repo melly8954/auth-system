@@ -5,16 +5,6 @@ import { JWT_ERROR_CODES } from '../api/errorCodes';
 
 let toastTimerId = null;
 
-function isRefreshTokenFailure(error) {
-  const errorCode = getApiErrorCode(error);
-  return (
-    errorCode === JWT_ERROR_CODES.REFRESH_TOKEN_NOT_FOUND ||
-    errorCode === JWT_ERROR_CODES.REFRESH_TOKEN_EXPIRED ||
-    errorCode === JWT_ERROR_CODES.REFRESH_TOKEN_INVALID ||
-    errorCode === JWT_ERROR_CODES.REFRESH_TOKEN_NOT_IN_REDIS
-  );
-}
-
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     userId: null,
@@ -143,11 +133,9 @@ export const useAuthStore = defineStore('auth', {
         this.accessToken = reissueResult?.newAccessToken || '';
         this.syncAccessToken();
       } catch (error) {
-        if (!isRefreshTokenFailure(error)) {
-          this.errorUiMessage = getApiErrorMessage(error, '인증 상태를 복구하지 못했습니다.');
-        }
-
+        // 리프레시 토큰도 만료된 경우, 로그아웃 처리
         this.resetState();
+        throw error;
       } finally {
         this.isLoading = false;
       }
