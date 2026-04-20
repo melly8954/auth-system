@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
 const DEFAULT_HEADERS = {
-  'Content-Type': 'application/json',
+  "Content-Type": "application/json",
 };
 
 export function createApiClient(baseURL, options = {}) {
@@ -21,6 +21,6 @@ export function getApiErrorCode(error) {
   return error?.response?.data?.errorCode ?? null;
 }
 
-export function getApiErrorMessage(error, fallbackMessage = '') {
+export function getApiErrorMessage(error, fallbackMessage = "") {
   return error?.response?.data?.message || fallbackMessage;
 }

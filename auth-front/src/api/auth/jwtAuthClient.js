@@ -55,7 +55,11 @@ api.interceptors.response.use(
     }
 
     // 토큰이 만료되어 401 에러가 발생한 경우
-    if (error.response?.status === 401 && !originConfig?._retry && isAccessTokenError(error)) {
+    if (
+      error.response?.status === 401 &&
+      !originConfig?._retry &&
+      isAccessTokenError(error)
+    ) {
       originConfig._retry = true;
       const authStore = useAuthStore();
 
@@ -72,7 +76,7 @@ api.interceptors.response.use(
 
         refreshError.mappedError = mappedError;
         authStore.errorUiMessage = mappedError.uiMessage;
-        authStore.showToast(mappedError.uiMessage, 'error');
+        authStore.showToast(mappedError.uiMessage, "error");
         return Promise.reject(refreshError);
       }
     }

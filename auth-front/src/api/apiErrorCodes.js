@@ -1,5 +1,5 @@
 export const COMMON_ERROR_CODES = {
-  INTERNAL_SERVER_ERROR: 'internal_server_error',
+  INTERNAL_SERVER_ERROR: "internal_server_error",
 };
 
 export const USER_ERROR_CODES = {
@@ -9,16 +9,16 @@ export const USER_ERROR_CODES = {
 };
 
 export const AUTH_ERROR_CODES = {
-  LOGIN_FAILED: 'AUTH_001',
-  ACCOUNT_LOCKED: 'AUTH_002',
-  ACCESS_TOKEN_NOT_FOUND: 'auth_access_001',
-  ACCESS_TOKEN_EXPIRED: 'auth_access_002',
-  ACCESS_TOKEN_INVALID: 'auth_access_003',
-  ACCESS_TOKEN_OF_BLACK_LIST: 'auth_access_004',
-  REFRESH_TOKEN_NOT_FOUND: 'auth_refresh_001',
-  REFRESH_TOKEN_EXPIRED: 'auth_refresh_002',
-  REFRESH_TOKEN_INVALID: 'auth_refresh_003',
-  REFRESH_TOKEN_NOT_IN_REDIS: 'auth_refresh_004',
-  UNAUTHORIZED: 'unauthorized',
-  FORBIDDEN: 'forbidden',
-}
+  LOGIN_FAILED: "AUTH_001",
+  ACCOUNT_LOCKED: "AUTH_002",
+  ACCESS_TOKEN_NOT_FOUND: "auth_access_001",
+  ACCESS_TOKEN_EXPIRED: "auth_access_002",
+  ACCESS_TOKEN_INVALID: "auth_access_003",
+  ACCESS_TOKEN_OF_BLACK_LIST: "auth_access_004",
+  REFRESH_TOKEN_NOT_FOUND: "auth_refresh_001",
+  REFRESH_TOKEN_EXPIRED: "auth_refresh_002",
+  REFRESH_TOKEN_INVALID: "auth_refresh_003",
+  REFRESH_TOKEN_NOT_IN_REDIS: "auth_refresh_004",
+  UNAUTHORIZED: "unauthorized",
+  FORBIDDEN: "forbidden",
+};

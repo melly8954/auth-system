@@ -1,24 +1,24 @@
-import { defineStore } from 'pinia';
-import * as jwtAuthClient from '../api/auth/jwtAuthClient';
-import { mapApiError } from '../api/apiErrorMapper';
-import { getApiResult } from '../api/http';
+import { defineStore } from "pinia";
+import * as jwtAuthClient from "../api/auth/jwtAuthClient";
+import { mapApiError } from "../api/apiErrorMapper";
+import { getApiResult } from "../api/http";
 
 let toastTimerId = null;
 
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
     userId: null,
-    accessToken: '',
+    accessToken: "",
     isAuthenticated: false,
     isLoading: false,
-    errorUiMessage: '',
-    toastUiMessage: '',
-    toastUiType: 'success',
+    errorUiMessage: "",
+    toastUiMessage: "",
+    toastUiType: "success",
   }),
 
   actions: {
-    showToast(message, type = 'success') {
-      this.toastUiMessage = message || '';
+    showToast(message, type = "success") {
+      this.toastUiMessage = message || "";
       this.toastUiType = type;
 
       if (toastTimerId) {
@@ -31,7 +31,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     hideToast() {
-      this.toastUiMessage = '';
+      this.toastUiMessage = "";
 
       if (toastTimerId) {
         clearTimeout(toastTimerId);
@@ -46,13 +46,13 @@ export const useAuthStore = defineStore('auth', {
     applyLoginResult(response) {
       const result = getApiResult(response);
 
-      this.accessToken = result?.accessToken || '';
+      this.accessToken = result?.accessToken || "";
       this.syncAccessToken();
     },
 
     resetState() {
       this.userId = null;
-      this.accessToken = '';
+      this.accessToken = "";
       this.isAuthenticated = false;
     },
 
@@ -62,10 +62,12 @@ export const useAuthStore = defineStore('auth', {
     },
 
     applyMappedError(error, fallbackMessage, options = {}) {
-      const mappedError = error?.mappedError || mapApiError(error, {
-        fallbackMessage,
-        ...options,
-      });
+      const mappedError =
+        error?.mappedError ||
+        mapApiError(error, {
+          fallbackMessage,
+          ...options,
+        });
 
       if (!this.errorUiMessage) {
         this.errorUiMessage = mappedError.uiMessage;
@@ -76,12 +78,12 @@ export const useAuthStore = defineStore('auth', {
 
     async signUp(payload) {
       this.isLoading = true;
-      this.errorUiMessage = '';
+      this.errorUiMessage = "";
 
       try {
         return await jwtAuthClient.signUp(payload);
       } catch (error) {
-        this.applyMappedError(error, '회원가입에 실패했습니다.');
+        this.applyMappedError(error, "회원가입에 실패했습니다.");
         throw error;
       } finally {
         this.isLoading = false;
@@ -90,7 +92,7 @@ export const useAuthStore = defineStore('auth', {
 
     async login(payload) {
       this.isLoading = true;
-      this.errorUiMessage = '';
+      this.errorUiMessage = "";
 
       try {
         const response = await jwtAuthClient.login(payload);
@@ -98,7 +100,10 @@ export const useAuthStore = defineStore('auth', {
         return response;
       } catch (error) {
         this.resetState();
-        this.applyMappedError(error, '로그인에 실패했습니다.', { stage: 'login' });
+        this.applyMappedError(error, "로그인에 실패했습니다.", {
+          stage: "login",
+        });
+        this.showToast(this.errorUiMessage, "error");
         throw error;
       } finally {
         this.isLoading = false;
@@ -107,13 +112,16 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       this.isLoading = true;
-      this.errorUiMessage = '';
+      this.errorUiMessage = "";
 
       try {
         const response = await jwtAuthClient.logout();
         this.showToast(response?.message);
       } catch (error) {
-        this.applyMappedError(error, '로그아웃에 실패했습니다.', { stage: 'logout' });
+        this.applyMappedError(error, "로그아웃에 실패했습니다.", {
+          stage: "logout",
+        });
+        this.showToast(this.errorUiMessage, "error");
       } finally {
         this.resetState();
         this.isLoading = false;
@@ -122,7 +130,7 @@ export const useAuthStore = defineStore('auth', {
 
     async verifyAccessToken() {
       this.isLoading = true;
-      this.errorUiMessage = '';
+      this.errorUiMessage = "";
 
       try {
         const response = await jwtAuthClient.fetchUser();
@@ -130,7 +138,9 @@ export const useAuthStore = defineStore('auth', {
         this.showToast(response?.message);
         return response;
       } catch (error) {
-        this.applyMappedError(error, '토큰 검증에 실패했습니다.', { stage: 'access' });
+        this.applyMappedError(error, "토큰 검증에 실패했습니다.", {
+          stage: "access",
+        });
         throw error;
       } finally {
         this.isLoading = false;
@@ -139,13 +149,13 @@ export const useAuthStore = defineStore('auth', {
 
     async tokenRefresh() {
       this.isLoading = true;
-      this.errorUiMessage = '';
+      this.errorUiMessage = "";
 
       try {
         const reissueResponse = await jwtAuthClient.reissueToken();
         const reissueResult = getApiResult(reissueResponse);
 
-        this.accessToken = reissueResult?.newAccessToken || '';
+        this.accessToken = reissueResult?.newAccessToken || "";
         this.syncAccessToken();
       } catch (error) {
         // 리프레시 토큰도 만료된 경우, 로그아웃 처리
