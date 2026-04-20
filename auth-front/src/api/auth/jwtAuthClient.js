@@ -60,7 +60,7 @@ api.interceptors.response.use(
 
       try {
         // 리프레시 토큰을 사용하여 새 액세스 토큰을 요청한다.
-        await authStore.bootstrap();
+        await authStore.tokenRefresh();
         // 실패했던 원래 요청을 다시 재시도
         return api(originConfig);
       } catch (error) {

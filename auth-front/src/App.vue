@@ -46,6 +46,6 @@ const authStore = useAuthStore();
 const { errorUiMessage, toastUiMessage, toastUiType } = storeToRefs(authStore);
 
 onMounted(() => {
-  authStore.bootstrap();
+  authStore.tokenRefresh();
 });
 </script>

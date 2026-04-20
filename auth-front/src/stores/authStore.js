@@ -122,7 +122,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async bootstrap() {
+    async tokenRefresh() {
       this.isLoading = true;
       this.errorUiMessage = '';
 
