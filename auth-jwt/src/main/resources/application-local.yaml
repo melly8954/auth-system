@@ -49,6 +49,7 @@ jwt:
   refreshExpiredMs: ${JWT_REFRESH_EXPIRED_MS}
 
 app:
+  frontend-url: http://localhost:5173
   cors:
     allowed-origins:
       - http://localhost:5173

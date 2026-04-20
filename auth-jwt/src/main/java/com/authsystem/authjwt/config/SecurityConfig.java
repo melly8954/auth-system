@@ -5,7 +5,7 @@ import com.authsystem.authjwt.auth.security.handler.CustomAccessDeniedHandler;
 import com.authsystem.authjwt.auth.security.handler.CustomAuthenticationEntryPoint;
 import com.authsystem.authjwt.auth.security.handler.LoginFailureHandler;
 import com.authsystem.authjwt.auth.security.handler.LoginSuccessHandler;
-import com.authsystem.authjwt.auth.security.handler.OAuth2FailHandler;
+import com.authsystem.authjwt.auth.security.handler.OAuth2FailureHandler;
 import com.authsystem.authjwt.auth.security.handler.OAuth2SuccessHandler;
 import com.authsystem.authjwt.auth.security.jwt.JwtFilter;
 import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
@@ -49,7 +49,7 @@ public class SecurityConfig {
     private final RedisTemplate<String, Object> redisTemplate;
     private final PrincipalOAuth2UserService principalOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final OAuth2FailHandler oAuth2FailHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
@@ -121,7 +121,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(principalOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
-                        .failureHandler(oAuth2FailHandler))
+                        .failureHandler(oAuth2FailureHandler))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint) // 인증 실패(401) 처리
                         .accessDeniedHandler(customAccessDeniedHandler)); // 인가 실패(403) 처리

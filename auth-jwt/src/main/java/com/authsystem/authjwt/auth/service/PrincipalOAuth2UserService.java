@@ -13,6 +13,8 @@ import com.authsystem.authjwt.user.repository.UserProfileRepository;
 import com.authsystem.authjwt.user.repository.UserRepository;
 import com.authsystem.authjwt.user.repository.UserSocialAccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -86,6 +88,14 @@ public class PrincipalOAuth2UserService implements OAuth2UserService<OidcUserReq
                     .providerEmail(email)
                     .build();
             userSocialAccountRepository.save(social);
+        }
+
+        UserStatus status = user.getStatus();
+
+        if (status == UserStatus.INACTIVE) {
+            throw new LockedException("계정이 일시정지 되었습니다.");
+        } else if (status != UserStatus.ACTIVE) {
+            throw new BadCredentialsException("아이디 또는 비밀번호가 틀립니다.");
         }
 
         // PrincipalDetails 반환 (SecurityContext에 사용)

@@ -153,9 +153,8 @@ export const useAuthStore = defineStore("auth", {
 
       try {
         const reissueResponse = await jwtAuthClient.reissueToken();
-        const reissueResult = getApiResult(reissueResponse);
 
-        this.accessToken = reissueResult?.newAccessToken || "";
+        this.accessToken = getApiResult(reissueResponse)?.newAccessToken || "";
         this.syncAccessToken();
       } catch (error) {
         // 리프레시 토큰도 만료된 경우, 로그아웃 처리

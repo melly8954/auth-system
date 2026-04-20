@@ -210,6 +210,22 @@ code {
   color: #b42318;
 }
 
+.oauth-callback-card {
+  max-width: 760px;
+}
+
+.oauth-callback-status {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: rgba(20, 33, 61, 0.06);
+}
+
+.oauth-callback-status span {
+  color: rgba(20, 33, 61, 0.68);
+}
+
 .toast {
   position: fixed;
   right: 24px;
