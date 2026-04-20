@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import * as jwtAuthClient from '../api/auth/jwtAuthClient';
 import { getApiErrorCode, getApiErrorMessage, getApiResult } from '../api/http';
-import { JWT_ERROR_CODES } from '../api/errorCodes';
 
 let toastTimerId = null;
 

@@ -1,7 +1,14 @@
-export const JWT_ERROR_CODES = {
-  USER_NOT_FOUND: 'USER_001',
-  DUPLICATE_USERNAME: 'USER_002',
-  DUPLICATE_EMAIL: 'USER_003',
+export const COMMON_ERROR_CODES = {
+  INTERNAL_SERVER_ERROR: 'internal_server_error',
+};
+
+export const USER_ERROR_CODES = {
+  USER_NOT_FOUND: "USER_001",
+  DUPLICATE_USERNAME: "USER_002",
+  DUPLICATE_EMAIL: "USER_003",
+};
+
+export const AUTH_ERROR_CODES = {
   LOGIN_FAILED: 'AUTH_001',
   ACCOUNT_LOCKED: 'AUTH_002',
   ACCESS_TOKEN_NOT_FOUND: 'auth_access_001',
@@ -14,5 +21,4 @@ export const JWT_ERROR_CODES = {
   REFRESH_TOKEN_NOT_IN_REDIS: 'auth_refresh_004',
   UNAUTHORIZED: 'unauthorized',
   FORBIDDEN: 'forbidden',
-  INTERNAL_SERVER_ERROR: 'internal_server_error',
 }
