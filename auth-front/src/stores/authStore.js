@@ -10,6 +10,7 @@ export const useAuthStore = defineStore("auth", {
     userId: null,
     accessToken: "",
     isAuthenticated: false,
+    isInitialized: false,
     isLoading: false,
     errorUiMessage: "",
     toastUiMessage: "",
@@ -54,6 +55,22 @@ export const useAuthStore = defineStore("auth", {
       this.userId = null;
       this.accessToken = "";
       this.isAuthenticated = false;
+    },
+
+    async initializeAuth() {
+      if (this.isInitialized) {
+        return;
+      }
+
+      try {
+        // 앱이 처음 열릴 때 refresh token으로 로그인 상태 복구를 시도합니다.
+        await this.tokenRefresh();
+      } catch (error) {
+        // refresh에 실패하면 비로그인 상태로 처리하고 다음 로직을 계속 진행합니다.
+        this.resetState();
+      } finally {
+        this.isInitialized = true;
+      }
     },
 
     applyVerifyResult(response) {

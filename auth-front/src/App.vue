@@ -12,9 +12,13 @@
         <div class="panel">
           <h2>바로가기</h2>
           <nav class="nav-links">
-            <RouterLink to="/signup">회원가입</RouterLink>
-            <RouterLink to="/login">로그인</RouterLink>
-            <RouterLink to="/">대시보드</RouterLink>
+            <template v-if="isAuthenticated">
+              <RouterLink to="/">대시보드</RouterLink>
+            </template>
+            <template v-else>
+              <RouterLink to="/signup">회원가입</RouterLink>
+              <RouterLink to="/login">로그인</RouterLink>
+            </template>
           </nav>
         </div>
 
@@ -38,14 +42,9 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from './stores/authStore';
 
 const authStore = useAuthStore();
-const { errorUiMessage, toastUiMessage, toastUiType } = storeToRefs(authStore);
-
-onMounted(() => {
-  authStore.tokenRefresh();
-});
+const { errorUiMessage, toastUiMessage, toastUiType, isAuthenticated } = storeToRefs(authStore);
 </script>
