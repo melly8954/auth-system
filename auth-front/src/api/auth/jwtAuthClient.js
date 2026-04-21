@@ -1,6 +1,7 @@
 import { useAuthStore } from "../../stores/authStore";
 import { isAccessTokenError, mapApiError } from "../apiErrorMapper";
 import { createApiClient } from "../http";
+import router from "../../router";
 
 const baseURL = import.meta.env.VITE_JWT_API_BASE_URL;
 const api = createApiClient(baseURL);
@@ -77,6 +78,10 @@ api.interceptors.response.use(
         refreshError.mappedError = mappedError;
         authStore.errorUiMessage = mappedError.uiMessage;
         authStore.showToast(mappedError.uiMessage, "error");
+        if (router.currentRoute.value.name !== "login") {
+          await router.push({ name: "login" });
+        }
+
         return Promise.reject(refreshError);
       }
     }
