@@ -57,22 +57,6 @@ export const useAuthStore = defineStore("auth", {
       this.isAuthenticated = false;
     },
 
-    async initializeAuth() {
-      if (this.isInitialized) {
-        return;
-      }
-
-      try {
-        // 앱이 처음 열릴 때 refresh token으로 로그인 상태 복구를 시도합니다.
-        await this.tokenRefresh();
-      } catch (error) {
-        // refresh에 실패하면 비로그인 상태로 처리하고 다음 로직을 계속 진행합니다.
-        this.resetState();
-      } finally {
-        this.isInitialized = true;
-      }
-    },
-
     applyVerifyResult(response) {
       const result = getApiResult(response);
       this.userId = result ?? null;
@@ -161,6 +145,23 @@ export const useAuthStore = defineStore("auth", {
         throw error;
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    // 라우터 가드에서 앱 첫 진입 시 로그인 상태 복구에 사용합니다.
+    async initializeAuth() {
+      if (this.isInitialized) {
+        return;
+      }
+
+      try {
+        // 앱이 처음 열릴 때 refresh token으로 로그인 상태 복구를 시도합니다.
+        await this.tokenRefresh();
+      } catch (error) {
+        // refresh에 실패하면 비로그인 상태로 처리하고 다음 로직을 계속 진행합니다.
+        this.resetState();
+      } finally {
+        this.isInitialized = true;
       }
     },
 
