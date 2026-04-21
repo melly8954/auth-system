@@ -44,7 +44,7 @@ export const useAuthStore = defineStore("auth", {
       this.isAuthenticated = !!this.accessToken;
     },
 
-    applyLoginResult(response) {
+    applyLoginState(response) {
       const result = getApiResult(response);
 
       this.accessToken = result?.accessToken || "";
@@ -57,7 +57,7 @@ export const useAuthStore = defineStore("auth", {
       this.isAuthenticated = false;
     },
 
-    applyVerifyResult(response) {
+    applyUserState(response) {
       const result = getApiResult(response);
       this.userId = result ?? null;
     },
@@ -97,7 +97,7 @@ export const useAuthStore = defineStore("auth", {
 
       try {
         const response = await jwtAuthClient.login(payload);
-        this.applyLoginResult(response);
+        this.applyLoginState(response);
         return response;
       } catch (error) {
         this.resetState();
@@ -135,7 +135,7 @@ export const useAuthStore = defineStore("auth", {
 
       try {
         const response = await jwtAuthClient.fetchUser();
-        this.applyVerifyResult(response);
+        this.applyUserState(response);
         this.showToast(response?.message);
         return response;
       } catch (error) {
