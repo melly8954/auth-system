@@ -16,3 +16,9 @@ spring:
         spring.jpa.hibernate.naming.physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         jdbc:
           time-zone: Asia/Seoul
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    encoding: UTF-8
+    clean-disabled: true
