@@ -14,8 +14,8 @@ import java.util.UUID;
 
 @Component
 public class JwtUtil {
-    private String issuer;
-    private SecretKey secretKey;
+    private final String issuer;
+    private final SecretKey secretKey;
 
     public JwtUtil(@Value("${jwt.issuer}")String issuer,
                    @Value("${jwt.secret}")String secret) {
