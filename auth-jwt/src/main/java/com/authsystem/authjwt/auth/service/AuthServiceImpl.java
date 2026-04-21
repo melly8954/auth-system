@@ -26,12 +26,6 @@ public class AuthServiceImpl implements AuthService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${jwt.accessExpiredMs}")
-    private long accessExpiredMs;
-
-    @Value("${jwt.refreshExpiredMs}")
-    private long refreshExpiredMs;
-
     @Override
     public ReIssueTokenDto reissueToken(String refreshToken, HttpServletResponse response) {
         // RefreshToken 존재하지 않는 경우
@@ -64,8 +58,8 @@ public class AuthServiceImpl implements AuthService {
         RefreshTokenDto refreshTokenDto = objectMapper.convertValue(redisValue, RefreshTokenDto.class);
 
         // 새로운 accessToken, refreshToken 생성
-        String newAccessToken = jwtUtil.createJwt("AccessToken", username, refreshTokenDto.getRole(), accessExpiredMs);
-        String newRefreshToken = jwtUtil.createJwt("RefreshToken", username, refreshTokenDto.getRole(), refreshExpiredMs);
+        String newAccessToken = jwtUtil.createJwt("AccessToken", username, refreshTokenDto.getRole());
+        String newRefreshToken = jwtUtil.createJwt("RefreshToken", username, refreshTokenDto.getRole());
 
         // 새로운 jti
         String newRefreshJti = jwtUtil.getTokenId(newRefreshToken);
@@ -76,10 +70,10 @@ public class AuthServiceImpl implements AuthService {
                 .username(username)
                 .role(refreshTokenDto.getRole())
                 .issuedAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs)))
+                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshExpiredMs())))
                 .build();
 
-        redisTemplate.opsForValue().set(newRefreshJti, newRefreshTokenDto, Duration.ofMillis(refreshExpiredMs));
+        redisTemplate.opsForValue().set(newRefreshJti, newRefreshTokenDto, Duration.ofMillis(jwtUtil.getRefreshExpiredMs()));
 
         // 기존 refresh token 삭제
         redisTemplate.delete(redisKey);

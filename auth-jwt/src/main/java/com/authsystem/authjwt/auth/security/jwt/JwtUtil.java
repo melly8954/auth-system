@@ -1,8 +1,12 @@
 package com.authsystem.authjwt.auth.security.jwt;
 
+import com.authsystem.authjwt.common.exception.CustomException;
+import com.authsystem.authjwt.common.exception.ErrorType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import lombok.Getter;
+import org.flywaydb.core.api.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,16 +16,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 
+@Getter
 @Component
 public class JwtUtil {
     private final String issuer;
     private final SecretKey secretKey;
+    private final long accessExpiredMs;
+    private final long refreshExpiredMs;
 
-    public JwtUtil(@Value("${jwt.issuer}")String issuer,
-                   @Value("${jwt.secret}")String secret) {
+    public JwtUtil(@Value("${jwt.issuer}") String issuer,
+                   @Value("${jwt.secret}") String secret,
+                   @Value("${jwt.accessExpiredMs}") long accessExpiredMs,
+                   @Value("${jwt.refreshExpiredMs}") long refreshExpiredMs) {
         this.issuer = issuer;
         // String 타입의 secret 을 객체변수(secretKey) 로 암호화
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.accessExpiredMs = accessExpiredMs;
+        this.refreshExpiredMs = refreshExpiredMs;
     }
 
     // 클레임에서 JTI(JWT ID(를 추출하는 메서드
@@ -53,7 +64,9 @@ public class JwtUtil {
     }
 
     // Jwt 생성
-    public String createJwt(String category, String username, String role,Long expiredMs){
+    public String createJwt(String category, String username, String role){
+        long expiredMs = resolveExpiredMs(category);
+
         return Jwts.builder()
                 .header().add("typ", "JWT").and()
                 .id(UUID.randomUUID().toString())
@@ -79,5 +92,13 @@ public class JwtUtil {
             // 만료되었더라도 payload 자체는 필요할 수 있으므로 반환
             return e.getClaims();
         }
+    }
+
+    private long resolveExpiredMs(String category) {
+        return switch (category) {
+            case "AccessToken" -> accessExpiredMs;
+            case "RefreshToken" -> refreshExpiredMs;
+            default -> throw new CustomException(ErrorType.INTERNAL_SERVER_ERROR);
+        };
     }
 }

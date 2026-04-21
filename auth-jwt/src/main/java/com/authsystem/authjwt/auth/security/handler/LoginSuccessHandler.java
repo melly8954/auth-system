@@ -35,12 +35,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final CookieUtil cookieUtil;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    @Value("${jwt.accessExpiredMs}")
-    private long accessExpiredMs;
-
-    @Value("${jwt.refreshExpiredMs}")
-    private long refreshExpiredMs;
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
@@ -49,8 +43,8 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         user.updateLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
 
-        String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name(), accessExpiredMs);
-        String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name(), refreshExpiredMs);
+        String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name());
+        String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name());
 
         String refreshJti = jwtUtil.getTokenId(refreshToken);
 
@@ -59,10 +53,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .username(user.getUsername())
                 .role(user.getRole().name())
                 .issuedAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpiredMs)))
+                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshExpiredMs())))
                 .build();
 
-        redisTemplate.opsForValue().set(refreshJti, refreshTokenDto, Duration.ofMillis(refreshExpiredMs));
+        redisTemplate.opsForValue().set(refreshJti, refreshTokenDto, Duration.ofMillis(jwtUtil.getRefreshExpiredMs()));
 
         // 쿠키 생성
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken, 1);
