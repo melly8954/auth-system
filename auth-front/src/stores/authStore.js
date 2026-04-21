@@ -129,7 +129,7 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async verifyAccessToken() {
+    async fetchCurrentUser() {
       this.isLoading = true;
       this.errorUiMessage = "";
 

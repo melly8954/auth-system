@@ -29,7 +29,7 @@
         type="button"
         class="primary-button"
         :disabled="isLoading || !isAuthenticated"
-        @click="authStore.verifyAccessToken()"
+        @click="authStore.fetchCurrentUser()"
       >
         토큰 검증 테스트
       </button>
