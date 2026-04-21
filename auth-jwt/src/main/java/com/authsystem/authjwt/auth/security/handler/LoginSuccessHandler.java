@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -76,7 +77,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         ApiResponse<?> apiResponse = ApiResponse.handlerOf(HttpStatus.OK, null, "로그인 성공", dto);
 
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json");
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
         objectMapper.writeValue(response.getWriter(), apiResponse);

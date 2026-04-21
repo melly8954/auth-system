@@ -92,11 +92,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(String BearerToken, String refreshToken, HttpServletResponse response) {
+    public void logout(String bearerToken, String refreshToken, HttpServletResponse response) {
         String accessToken = null;
 
-        if (BearerToken != null && BearerToken.startsWith("Bearer ")) {
-            accessToken = BearerToken.substring(7); // "Bearer " 제거
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            accessToken = bearerToken.substring(7); // "Bearer " 제거
         }
 
         // 토큰에서 남은 만료 시간 계산

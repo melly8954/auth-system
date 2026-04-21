@@ -27,10 +27,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader(name = "Authorization", required = false) String BearerToken,
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader(name = "Authorization", required = false) String bearerToken,
                                                     @CookieValue(name = "RefreshToken", defaultValue = "") String refreshToken,
                                                     HttpServletResponse response) {
-        authService.logout(BearerToken, refreshToken, response);
+        authService.logout(bearerToken, refreshToken, response);
         return ApiResponse.of(HttpStatus.OK, "null","로그아웃 성공", null);
     }
 }
