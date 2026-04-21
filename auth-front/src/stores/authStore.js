@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import * as jwtAuthClient from "../api/auth/jwtAuthClient";
+import * as auth from "../api/auth/auth";
 import { mapApiError } from "../api/apiErrorMapper";
 import { getApiResult } from "../api/http";
 
@@ -82,7 +82,7 @@ export const useAuthStore = defineStore("auth", {
       this.errorUiMessage = "";
 
       try {
-        return await jwtAuthClient.signUp(payload);
+        return await auth.signUp(payload);
       } catch (error) {
         this.applyMappedError(error, "회원가입에 실패했습니다.");
         throw error;
@@ -96,7 +96,7 @@ export const useAuthStore = defineStore("auth", {
       this.errorUiMessage = "";
 
       try {
-        const response = await jwtAuthClient.login(payload);
+        const response = await auth.login(payload);
         this.applyLoginState(response);
         return response;
       } catch (error) {
@@ -116,7 +116,7 @@ export const useAuthStore = defineStore("auth", {
       this.errorUiMessage = "";
 
       try {
-        const response = await jwtAuthClient.logout();
+        const response = await auth.logout();
         this.showToast(response?.message);
       } catch (error) {
         this.applyMappedError(error, "로그아웃에 실패했습니다.", {
@@ -134,7 +134,7 @@ export const useAuthStore = defineStore("auth", {
       this.errorUiMessage = "";
 
       try {
-        const response = await jwtAuthClient.fetchUser();
+        const response = await auth.fetchUser();
         this.applyUserState(response);
         this.showToast(response?.message);
         return response;
@@ -170,7 +170,7 @@ export const useAuthStore = defineStore("auth", {
       this.errorUiMessage = "";
 
       try {
-        const reissueResponse = await jwtAuthClient.reissueToken();
+        const reissueResponse = await auth.reissueToken();
 
         this.accessToken = getApiResult(reissueResponse)?.newAccessToken || "";
         this.syncAccessToken();
