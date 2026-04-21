@@ -41,11 +41,13 @@ public class AuthServiceImpl implements AuthService {
 
         // 토큰 만료 확인
         if (jwtUtil.isExpired(refreshToken)) {
+            response.addCookie(cookieUtil.deleteCookie("RefreshToken"));
             throw new CustomException(ErrorType.REFRESH_TOKEN_EXPIRED);
         }
 
         // 카테고리 확인
         if (!"RefreshToken".equals(jwtUtil.getCategory(refreshToken))) {
+            response.addCookie(cookieUtil.deleteCookie("RefreshToken"));
             throw new CustomException(ErrorType.REFRESH_TOKEN_INVALID);
         }
 
@@ -54,6 +56,7 @@ public class AuthServiceImpl implements AuthService {
         Object redisValue = redisTemplate.opsForValue().get(redisKey);
 
         if (redisValue == null) {
+            response.addCookie(cookieUtil.deleteCookie("RefreshToken"));
             throw new CustomException(ErrorType.REFRESH_TOKEN_NOT_IN_REDIS);
         }
 
