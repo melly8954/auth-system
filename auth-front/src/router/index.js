@@ -35,7 +35,8 @@ const router = createRouter({
 })
 
 // 라우트 이동 전에 로그인 상태를 먼저 확인하고 접근 가능 여부를 판단합니다.
-router.beforeEach(async (to) => {
+// beforeEach에 전달하는 인자 중 to는 이동하려는 경로를 나타내고 from은 이동 전 현재 경로 정보이다.
+router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
 
   // 앱 첫 진입 시 refresh token 기반으로 로그인 상태를 복구합니다.
