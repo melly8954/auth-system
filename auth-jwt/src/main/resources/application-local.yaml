@@ -38,8 +38,9 @@ spring:
             user-name-attribute: sub
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST}
       port: ${REDIS_LOCAL_PORT}
+      password: ${REDIS_PASSWORD}
       database: 0
 
 jwt:
