@@ -93,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Redis 블랙리스트에 저장(TTL 설정)
         if (expiration > 0) {
-            authTokenRedisRepository.blacklistAccessToken(accessToken, expiration);
+            authTokenRedisRepository.saveBlacklist(accessToken, expiration);
         }
 
         String key = jwtUtil.getTokenId(refreshToken);

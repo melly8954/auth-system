@@ -21,6 +21,15 @@ public class AuthTokenRedisRepository {
         redisTemplate.opsForValue().set(tokenId, refreshTokenDto, Duration.ofMillis(ttlMs));
     }
 
+    public void saveBlacklist(String accessToken, long ttlMs) {
+        redisTemplate.opsForValue().set(
+                BLACKLIST_PREFIX + accessToken,
+                "logout",
+                ttlMs,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
     public RefreshTokenDto findRefreshToken(String tokenId) {
         Object redisValue = redisTemplate.opsForValue().get(tokenId);
         if (redisValue == null) {
@@ -32,15 +41,6 @@ public class AuthTokenRedisRepository {
 
     public void deleteRefreshToken(String tokenId) {
         redisTemplate.delete(tokenId);
-    }
-
-    public void blacklistAccessToken(String accessToken, long ttlMs) {
-        redisTemplate.opsForValue().set(
-                BLACKLIST_PREFIX + accessToken,
-                "logout",
-                ttlMs,
-                TimeUnit.MILLISECONDS
-        );
     }
 
     public boolean isBlacklistedAccessToken(String accessToken) {
