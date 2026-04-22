@@ -101,7 +101,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // 블랙리스트 체크
-        if (authTokenRedisRepository.isBlacklistedAccessToken(accessToken)) {
+        if (authTokenRedisRepository.hasBlacklistedToken(accessToken)) {
             log.error("Blacklisted JWT token");
 
             sendErrorResponse(

@@ -43,7 +43,7 @@ public class AuthTokenRedisRepository {
         redisTemplate.delete(tokenId);
     }
 
-    public boolean isBlacklistedAccessToken(String accessToken) {
+    public boolean hasBlacklistedToken(String accessToken) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken));
     }
 }
