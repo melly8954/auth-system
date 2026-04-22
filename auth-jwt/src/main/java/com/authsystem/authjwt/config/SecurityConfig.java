@@ -1,13 +1,13 @@
 package com.authsystem.authjwt.config;
 
 import com.authsystem.authjwt.auth.security.filter.JsonLoginFilter;
+import com.authsystem.authjwt.auth.security.filter.JwtFilter;
 import com.authsystem.authjwt.auth.security.handler.CustomAccessDeniedHandler;
 import com.authsystem.authjwt.auth.security.handler.CustomAuthenticationEntryPoint;
 import com.authsystem.authjwt.auth.security.handler.LoginFailureHandler;
 import com.authsystem.authjwt.auth.security.handler.LoginSuccessHandler;
 import com.authsystem.authjwt.auth.security.handler.OAuth2FailureHandler;
 import com.authsystem.authjwt.auth.security.handler.OAuth2SuccessHandler;
-import com.authsystem.authjwt.auth.security.jwt.JwtFilter;
 import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
 import com.authsystem.authjwt.auth.service.CustomAuthorizationRequestResolver;
 import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
@@ -39,8 +39,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties(SecurityConfig.CorsProperties.class)
 @RequiredArgsConstructor
+@EnableConfigurationProperties(SecurityConfig.CorsProperties.class)
 public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;

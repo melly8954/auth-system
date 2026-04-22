@@ -1,5 +1,6 @@
-package com.authsystem.authjwt.auth.security.jwt;
+package com.authsystem.authjwt.auth.security.filter;
 
+import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
 import com.authsystem.authjwt.auth.security.principal.PrincipalDetails;
 import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
 import com.authsystem.authjwt.common.domain.dto.ApiResponse;

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +27,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ReIssueTokenDto reissueToken(String refreshToken, HttpServletResponse response) {
-        // RefreshToken 존재하지 않는 경우
+        // RefreshToken이 존재하지 않는 경우
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new CustomException(ErrorType.REFRESH_TOKEN_NOT_FOUND);
         }
@@ -70,10 +69,10 @@ public class AuthServiceImpl implements AuthService {
                 .username(username)
                 .role(refreshTokenDto.getRole())
                 .issuedAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshExpiredMs())))
+                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshTokenExpiredMs())))
                 .build();
 
-        redisTemplate.opsForValue().set(newRefreshJti, newRefreshTokenDto, Duration.ofMillis(jwtUtil.getRefreshExpiredMs()));
+        redisTemplate.opsForValue().set(newRefreshJti, newRefreshTokenDto, Duration.ofMillis(jwtUtil.getRefreshTokenExpiredMs()));
 
         // 기존 refresh token 삭제
         redisTemplate.delete(redisKey);
@@ -107,12 +106,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String key = jwtUtil.getTokenId(refreshToken);
-
         redisTemplate.delete(key);
 
         // 쿠키에서 refresh token 제거
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", null, 0);
-
         response.addCookie(refreshCookie);
     }
 }

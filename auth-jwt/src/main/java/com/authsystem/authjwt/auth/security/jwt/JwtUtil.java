@@ -5,9 +5,6 @@ import com.authsystem.authjwt.common.exception.ErrorType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import lombok.Getter;
-import org.flywaydb.core.api.ErrorCode;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -16,31 +13,26 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 
-@Getter
 @Component
 public class JwtUtil {
-    private final String issuer;
+    private final JwtProperties jwtProperties;
     private final SecretKey secretKey;
-    private final long accessExpiredMs;
-    private final long refreshExpiredMs;
 
-    public JwtUtil(@Value("${jwt.issuer}") String issuer,
-                   @Value("${jwt.secret}") String secret,
-                   @Value("${jwt.accessExpiredMs}") long accessExpiredMs,
-                   @Value("${jwt.refreshExpiredMs}") long refreshExpiredMs) {
-        this.issuer = issuer;
-        // String 타입의 secret 을 객체변수(secretKey) 로 암호화
-        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
-        this.accessExpiredMs = accessExpiredMs;
-        this.refreshExpiredMs = refreshExpiredMs;
+    public JwtUtil(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+        // String 타입의 secret을 객체 변수(secretKey)로 암호화
+        this.secretKey = new SecretKeySpec(
+                jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8),
+                Jwts.SIG.HS256.key().build().getAlgorithm()
+        );
     }
 
-    // 클레임에서 JTI(JWT ID(를 추출하는 메서드
+    // 클레임에서 JTI(JWT ID)를 추출하는 메서드
     public String getTokenId(String token) {
         return getClaims(token).getId();
     }
 
-    public String getCategory(String token){
+    public String getCategory(String token) {
         return getClaims(token).get("category", String.class);
     }
 
@@ -63,17 +55,25 @@ public class JwtUtil {
         return getClaims(token).getExpiration().before(new Date());
     }
 
-    // Jwt 생성
-    public String createJwt(String category, String username, String role){
+    public long getAccessTokenExpiredMs() {
+        return jwtProperties.getAccessExpiredMs();
+    }
+
+    public long getRefreshTokenExpiredMs() {
+        return jwtProperties.getRefreshExpiredMs();
+    }
+
+    // JWT 생성
+    public String createJwt(String category, String username, String role) {
         long expiredMs = resolveExpiredMs(category);
 
         return Jwts.builder()
                 .header().add("typ", "JWT").and()
                 .id(UUID.randomUUID().toString())
-                .issuer(this.issuer)
-                .claim("category",category)
-                .claim("username",username)
-                .claim("role",role)
+                .issuer(jwtProperties.getIssuer())
+                .claim("category", category)
+                .claim("username", username)
+                .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
@@ -96,8 +96,8 @@ public class JwtUtil {
 
     private long resolveExpiredMs(String category) {
         return switch (category) {
-            case "AccessToken" -> accessExpiredMs;
-            case "RefreshToken" -> refreshExpiredMs;
+            case "AccessToken" -> getAccessTokenExpiredMs();
+            case "RefreshToken" -> getRefreshTokenExpiredMs();
             default -> throw new CustomException(ErrorType.INTERNAL_SERVER_ERROR);
         };
     }

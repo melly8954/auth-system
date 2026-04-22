@@ -41,7 +41,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         userRepository.save(user);
 
         String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name());
-
         String refreshJti = jwtUtil.getTokenId(refreshToken);
 
         RefreshTokenDto refreshTokenDto = RefreshTokenDto.builder()
@@ -49,10 +48,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 .username(user.getUsername())
                 .role(user.getRole().name())
                 .issuedAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshExpiredMs())))
+                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshTokenExpiredMs())))
                 .build();
 
-        redisTemplate.opsForValue().set(refreshJti, refreshTokenDto, Duration.ofMillis(jwtUtil.getRefreshExpiredMs()));
+        redisTemplate.opsForValue().set(refreshJti, refreshTokenDto, Duration.ofMillis(jwtUtil.getRefreshTokenExpiredMs()));
 
         // 쿠키 생성
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken, 1);
