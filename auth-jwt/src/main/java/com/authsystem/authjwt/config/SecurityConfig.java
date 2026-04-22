@@ -44,9 +44,7 @@ import java.util.List;
 public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
-    private final JwtUtil jwtUtil;
-    private final PrincipalDetailsService principalDetailsService;
-    private final AuthTokenRedisRepository authTokenRedisRepository;
+    private final JwtFilter jwtFilter;
     private final PrincipalOAuth2UserService principalOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
@@ -110,9 +108,7 @@ public class SecurityConfig {
                     이후 필터들은 인증된 사용자로 인식
                     (※ 해당 인증 정보는 요청 동안만 유지되며, 요청 종료 시 사라진다.)
                 */
-                .addFilterBefore(
-                        new JwtFilter(jwtUtil, principalDetailsService, authTokenRedisRepository),
-                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(createJsonLoginFilter(authenticationManager),
                         UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2

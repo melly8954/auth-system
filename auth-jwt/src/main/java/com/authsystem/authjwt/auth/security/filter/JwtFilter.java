@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.io.PrintWriter;
     → 이후 필터 및 컨트롤러는 인증된 사용자로 인식
  */
 @Slf4j
+@Component
 public class JwtFilter extends OncePerRequestFilter {
     // OncePerRequestFilter 는 Spring Framework 에서 제공하는 추상 클래스로, 하나의 HTTP 요청(request)당 딱 한 번만 실행되는 필터
     // JWT 검증 로직은 인증이 필요한 요청이 들어올 때마다 확실히 한 번만 실행되도록 보장
