@@ -8,6 +8,7 @@ import com.authsystem.authjwt.auth.security.handler.LoginFailureHandler;
 import com.authsystem.authjwt.auth.security.handler.LoginSuccessHandler;
 import com.authsystem.authjwt.auth.security.handler.OAuth2FailureHandler;
 import com.authsystem.authjwt.auth.security.handler.OAuth2SuccessHandler;
+import com.authsystem.authjwt.auth.repository.AuthTokenRedisRepository;
 import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
 import com.authsystem.authjwt.auth.service.CustomAuthorizationRequestResolver;
 import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
@@ -18,7 +19,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -46,7 +46,7 @@ public class SecurityConfig {
     private final LoginFailureHandler loginFailureHandler;
     private final JwtUtil jwtUtil;
     private final PrincipalDetailsService principalDetailsService;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final AuthTokenRedisRepository authTokenRedisRepository;
     private final PrincipalOAuth2UserService principalOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
@@ -111,7 +111,7 @@ public class SecurityConfig {
                     (※ 해당 인증 정보는 요청 동안만 유지되며, 요청 종료 시 사라진다.)
                 */
                 .addFilterBefore(
-                        new JwtFilter(jwtUtil, principalDetailsService, redisTemplate),
+                        new JwtFilter(jwtUtil, principalDetailsService, authTokenRedisRepository),
                         UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(createJsonLoginFilter(authenticationManager),
                         UsernamePasswordAuthenticationFilter.class)

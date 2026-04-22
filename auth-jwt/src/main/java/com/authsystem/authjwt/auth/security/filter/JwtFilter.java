@@ -1,5 +1,6 @@
 package com.authsystem.authjwt.auth.security.filter;
 
+import com.authsystem.authjwt.auth.repository.AuthTokenRedisRepository;
 import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
 import com.authsystem.authjwt.auth.security.principal.PrincipalDetails;
 import com.authsystem.authjwt.auth.service.PrincipalDetailsService;
@@ -11,7 +12,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -43,12 +43,12 @@ public class JwtFilter extends OncePerRequestFilter {
     // JWT 검증 로직은 인증이 필요한 요청이 들어올 때마다 확실히 한 번만 실행되도록 보장
     private final JwtUtil jwtUtil;
     private final PrincipalDetailsService principalDetailsService;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final AuthTokenRedisRepository authTokenRedisRepository;
 
-    public JwtFilter(JwtUtil jwtUtil, PrincipalDetailsService principalDetailsService, RedisTemplate<String, Object> redisTemplate) {
+    public JwtFilter(JwtUtil jwtUtil, PrincipalDetailsService principalDetailsService, AuthTokenRedisRepository authTokenRedisRepository) {
         this.jwtUtil = jwtUtil;
         this.principalDetailsService = principalDetailsService;
-        this.redisTemplate = redisTemplate;
+        this.authTokenRedisRepository = authTokenRedisRepository;
     }
 
     @Override
@@ -99,8 +99,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // 블랙리스트 체크
-        Boolean isBlacklisted = redisTemplate.hasKey("BLACKLIST_" + accessToken);
-        if (Boolean.TRUE.equals(isBlacklisted)) {
+        if (authTokenRedisRepository.isBlacklistedAccessToken(accessToken)) {
             log.error("Blacklisted JWT token");
 
             sendErrorResponse(

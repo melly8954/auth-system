@@ -2,6 +2,7 @@ package com.authsystem.authjwt.auth.security.handler;
 
 import com.authsystem.authjwt.auth.dto.LoginResponse;
 import com.authsystem.authjwt.auth.dto.RefreshTokenDto;
+import com.authsystem.authjwt.auth.repository.AuthTokenRedisRepository;
 import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
 import com.authsystem.authjwt.auth.security.principal.PrincipalDetails;
 import com.authsystem.authjwt.common.domain.dto.ApiResponse;
@@ -14,7 +15,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -32,7 +32,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final ObjectMapper objectMapper;
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final AuthTokenRedisRepository authTokenRedisRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -55,7 +55,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshTokenExpiredMs())))
                 .build();
 
-        redisTemplate.opsForValue().set(refreshJti, refreshTokenDto, Duration.ofMillis(jwtUtil.getRefreshTokenExpiredMs()));
+        authTokenRedisRepository.saveRefreshToken(refreshJti, refreshTokenDto, jwtUtil.getRefreshTokenExpiredMs());
 
         // 쿠키 생성
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken, 1);

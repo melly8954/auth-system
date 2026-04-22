@@ -1,6 +1,7 @@
 package com.authsystem.authjwt.auth.security.handler;
 
 import com.authsystem.authjwt.auth.dto.RefreshTokenDto;
+import com.authsystem.authjwt.auth.repository.AuthTokenRedisRepository;
 import com.authsystem.authjwt.auth.security.jwt.JwtUtil;
 import com.authsystem.authjwt.auth.security.principal.PrincipalDetails;
 import com.authsystem.authjwt.common.util.CookieUtil;
@@ -12,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final AuthTokenRedisRepository authTokenRedisRepository;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -51,7 +51,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshTokenExpiredMs())))
                 .build();
 
-        redisTemplate.opsForValue().set(refreshJti, refreshTokenDto, Duration.ofMillis(jwtUtil.getRefreshTokenExpiredMs()));
+        authTokenRedisRepository.saveRefreshToken(refreshJti, refreshTokenDto, jwtUtil.getRefreshTokenExpiredMs());
 
         // 쿠키 생성
         Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken, 1);
