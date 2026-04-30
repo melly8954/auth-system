@@ -47,6 +47,9 @@ dependencies {
     // flyway
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
+
+    // cloudflare r2 (s3 compatible)
+    implementation 'software.amazon.awssdk:s3:2.32.18'
 }
 
 tasks.named('test') {

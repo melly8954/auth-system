@@ -22,3 +22,19 @@ spring:
     baseline-on-migrate: true
     encoding: UTF-8
     clean-disabled: true
+
+app:
+  r2:
+    enabled: ${R2_ENABLED:false}
+    account-id: ${R2_ACCOUNT_ID:}
+    access-key-id: ${R2_ACCESS_KEY_ID:}
+    secret-access-key: ${R2_SECRET_ACCESS_KEY:}
+    bucket: ${R2_BUCKET:}
+    public-base-url: ${R2_PUBLIC_BASE_URL:}
+    upload-prefix: ${R2_UPLOAD_PREFIX:profiles/pending}
+    presigned-url-expiry-minutes: ${R2_PRESIGNED_URL_EXPIRY_MINUTES:10}
+    max-file-size-bytes: ${R2_MAX_FILE_SIZE_BYTES:5242880}
+    allowed-content-types:
+      - image/jpeg
+      - image/png
+      - image/webp

@@ -55,7 +55,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // 토큰이 만료되어 401 에러가 발생한 경우
+    // 액세스 토큰이 만료되어 401 에러가 발생한 경우 재발급 후 원래 요청을 다시 시도한다.
     if (
       error.response?.status === 401 &&
       !originConfig?._retry &&
@@ -67,7 +67,7 @@ api.interceptors.response.use(
       try {
         // 리프레시 토큰을 사용하여 새 액세스 토큰을 요청한다.
         await authStore.tokenRefresh();
-        // 실패했던 원래 요청을 다시 재시도
+        // 실패했던 원래 요청을 다시 재시도한다.
         return api(originConfig);
       } catch (refreshError) {
         const mappedError = mapApiError(refreshError, {
@@ -92,6 +92,15 @@ api.interceptors.response.use(
 
 export async function signUp(payload) {
   const response = await api.post("/api/v1/users", payload);
+  return response.data;
+}
+
+// 프로필 이미지 업로드 전에 presigned URL과 최종 공개 URL을 발급받는다.
+export async function requestProfileImageUploadUrl(payload) {
+  const response = await api.post(
+    "/api/v1/users/profile-image/upload-url",
+    payload,
+  );
   return response.data;
 }
 

@@ -21,6 +21,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ProfileImageService profileImageService;
 
     @Override
     @Transactional
@@ -46,6 +47,7 @@ public class UserServiceImpl implements UserService {
                 .user(user)
                 .name(request.getName())
                 .nickname(request.getNickname())
+                .imageUrl(profileImageService.normalizeProfileImageUrl(request.getImageUrl()))
                 .build();
         userProfileRepository.save(profile);
 

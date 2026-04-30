@@ -17,4 +17,5 @@ public class SignUpRequest {
     private String email;
     private String name;
     private String nickname;
+    private String imageUrl;
 }

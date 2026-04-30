@@ -91,6 +91,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/api/v1/users").permitAll()
+                        .requestMatchers("/api/v1/users/profile-image/upload-url").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/admins/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
